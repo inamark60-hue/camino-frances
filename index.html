@@ -1,34 +1,27 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
-  <meta name="theme-color" content="#062b65" />
-  <meta name="description" content="BUEN CAMINO: guía móvil gratuita del Camino Francés para Android." />
-  <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
-  <link rel="preconnect" href="https://unpkg.com" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#062b65">
+  <meta name="description" content="BUEN CAMINO: guía gratuita del Camino Francés para Android.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="styles.css">
   <title>BUEN CAMINO</title>
 </head>
 <body>
   <div class="android-shell">
     <header class="topbar">
-      <div class="brand" data-nav="home" role="button" tabindex="0">
-        <div class="shell-logo">✦</div>
-        <div><strong>BUEN CAMINO</strong><span>CAMINO FRANCÉS</span></div>
-      </div>
-      <div class="top-actions">
-        <button class="doubts-btn" id="doubtsBtn" aria-label="Abrir dudas y consejos"><span>?</span><b class="doubts-label">DUDAS</b></button>
-        <button class="icon-btn" id="installBtn" aria-label="Instalar aplicación" hidden>⬇</button>
-      </div>
+      <button class="brand" id="brandBtn" aria-label="Inicio">
+        <img src="icon-192.png" alt="" class="brand-icon">
+        <span><strong>BUEN CAMINO</strong><small>CAMINO FRANCÉS</small></span>
+      </button>
+      <button class="doubts-btn" id="doubtsBtn"><b>?</b> DUDAS</button>
     </header>
-
-    <main id="app" aria-live="polite"></main>
-
-    <nav class="bottom-nav" aria-label="Navegación principal">
+    <main id="app"></main>
+    <nav class="bottom-nav">
       <button data-nav="home" class="active"><span>⌂</span>Inicio</button>
       <button data-nav="stages"><span>👣</span>Etapas</button>
       <button data-nav="map"><span>🗺</span>Mapa</button>
@@ -36,17 +29,16 @@
       <button data-nav="mycamino"><span>◎</span>Mi Camino</button>
     </nav>
   </div>
-
   <div id="toast" class="toast" role="status"></div>
   <div id="doubtsBackdrop" class="doubts-backdrop" hidden>
-    <section id="doubtsSheet" class="doubts-sheet" role="dialog" aria-modal="true" aria-labelledby="doubtsTitle">
-      <div class="doubts-head"><div><span class="doubts-kicker">AYUDA RÁPIDA</span><h2 id="doubtsTitle">DUDAS · Consejos del peregrino</h2></div><button id="closeDoubts" aria-label="Cerrar">×</button></div>
+    <section class="doubts-sheet" role="dialog" aria-modal="true" aria-labelledby="doubtsTitle">
+      <div class="doubts-head"><div><span>AYUDA RÁPIDA</span><h2 id="doubtsTitle">DUDAS · Consejos del peregrino</h2></div><button id="closeDoubts">×</button></div>
       <div id="doubtsBody" class="doubts-body"></div>
     </section>
   </div>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <div id="focusOverlay" class="focus-overlay" hidden></div>
   <script src="data.js"></script>
-<script src="verified-routes.js"></script>
+  <script src="verified-routes.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

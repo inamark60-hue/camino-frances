@@ -1,519 +1,120 @@
 const app=document.getElementById('app');
 const toastEl=document.getElementById('toast');
-let currentView='home',deferredPrompt,mapInstance,mapLayers={};
-let mapBuildSeq=0;
-let mapFocusActive=false,elevationMarker=null,currentElevationSamples=[],elevationSelector=null,currentStageRouteSegs=[];
-let routeDotMarkers=[],routeGuideLines=[],routeHaloLines=[];
-let physicalOrientationLast=0;
-let routeVisible=localStorage.getItem('camino-route-visible')!=='0';
-const favorites=new Set(JSON.parse(localStorage.getItem('camino-favorites')||'[]'));
-const doneStages=new Set(JSON.parse(localStorage.getItem('camino-done')||'[]').map(Number));
-
-const DATA_BASE='https://cdn.jsdelivr.net/gh/walktalkmeditate/open-pilgrimages@v1/routes/camino-frances';
-const ROUTE_URL=`${DATA_BASE}/route.geojson`;
-const WAYPOINTS_URL=`${DATA_BASE}/waypoints.geojson`;
-const STAGES_URL=`${DATA_BASE}/stages.json`;
-let remoteRoute=null,remoteWaypoints=null,remoteStages=null;
-
-const STAGE_BBOX={1:{minLat:42.995,maxLat:43.175,minLon:-1.335,maxLon:-1.205}};
-// Muestras de altitud verificadas de la etapa 1 (GPX Fundación ONCE).
-// Se anclan a la geometría de alta resolución para dibujar el perfil y sincronizar mapa/gráfica.
-const STAGE1_ELEVATION_ANCHORS=[
- [43.163668,-1.234870,170.2],[43.152103,-1.242169,265.0],[43.139785,-1.240182,324.4],
- [43.129554,-1.242366,344.7],[43.121261,-1.243408,521.9],[43.115917,-1.237614,726.2],
- [43.104260,-1.239437,867.0],[43.091490,-1.243935,973.9],[43.084113,-1.252092,1086.2],
- [43.077655,-1.262482,1094.2],[43.068260,-1.269020,1189.7],[43.057277,-1.266668,1231.1],
- [43.047190,-1.264913,1321.4],[43.041941,-1.276306,1247.4],[43.036433,-1.290694,1340.9],
- [43.028320,-1.295898,1450.0],[43.027185,-1.295453,1412.7],[43.026167,-1.305500,1277.4],
- [43.023584,-1.313762,1188.4],[43.020342,-1.321249,1073.3],[43.014461,-1.317398,982.3],
- [43.008475,-1.319832,953.8]
-];
-const TYPE_LABEL={water_source:'Agua',medical:'Farmacia / salud',accommodation:'Dormir',food:'Comer',transport:'Transporte',supply:'Suministros / WC',credential_stamp:'Sello',information:'Información',viewpoint:'Mirador',cultural_site:'Cultura',sacred_site:'Lugar jacobeo',town:'Localidad',camping:'Camping',pass:'Puerto',waymarker:'Señal'};
-const TYPE_ICON={water_source:'💧',medical:'✚',accommodation:'🛏',food:'🍴',transport:'🚌',supply:'🛒',credential_stamp:'🟨',information:'ℹ️',viewpoint:'👁',cultural_site:'🏛',sacred_site:'⛪',town:'📍',camping:'⛺',pass:'⛰',waymarker:'➡️'};
+const focusOverlay=document.getElementById('focusOverlay');
+let currentView='home', currentStageNo=null, mainMap=null, focusMap=null, routeVisible=localStorage.getItem('bc-route')!=='0';
+const favorites=new Set(JSON.parse(localStorage.getItem('bc-favs')||'[]'));
+const doneStages=new Set(JSON.parse(localStorage.getItem('bc-done')||'[]').map(Number));
 
 const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-function toast(msg){toastEl.textContent=msg;toastEl.classList.add('show');setTimeout(()=>toastEl.classList.remove('show'),2400)}
-function save(){localStorage.setItem('camino-favorites',JSON.stringify([...favorites]));localStorage.setItem('camino-done',JSON.stringify([...doneStages]))}
-function setActive(nav){document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.toggle('active',b.dataset.nav===nav))}
-function kmTotal(){return STAGES.reduce((a,s)=>a+s.km,0)}
-function stageCard(s){return `<article class="stage-card ${s.n===1?'featured':''}" data-stage="${s.n}" role="button" tabindex="0"><div class="num">${s.n}</div><div><h3>${esc(s.from)} → ${esc(s.to)}</h3><div class="meta">${s.km.toFixed(1)} km · ${s.h} · ${s.difficulty}</div></div><div class="arrow">›</div></article>`}
+const toast=s=>{toastEl.textContent=s;toastEl.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>toastEl.classList.remove('show'),2400)};
+const save=()=>{localStorage.setItem('bc-favs',JSON.stringify([...favorites]));localStorage.setItem('bc-done',JSON.stringify([...doneStages]));};
+const mapsUrl=(lat,lon)=>`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lat+','+lon)}`;
+const earthUrl=(lat,lon)=>`https://earth.google.com/web/search/${encodeURIComponent(lat+','+lon)}`;
+const osmUrl=(lat,lon,z=16)=>`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=${z}/${lat}/${lon}`;
 
-function quickButtons(){return [
- ['🛏','Dormir','alojamiento'],['🍴','Comer','restaurante'],['💧','Agua','fuente'],['🌦','Meteorología','meteorología'],['✚','Farmacia','farmacia'],
- ['❤','Salud','centro de salud'],['🚕','Taxi','taxi'],['🚌','Bus / Tren','transporte'],['🛒','Tienda','supermercado'],
- ['🏧','Cajero','cajero automático'],['🧺','Lavandería','lavandería'],['🚻','WC','aseos públicos'],['🚲','Bicicleta','taller bicicletas'],
- ['🟨','Sellos','credencial peregrino'],['🩹','Primeros auxilios','primeros_auxilios'],['🛡','Policía','policía guardia civil'],['🏛','Ayuntamiento','ayuntamiento'],['⚠','Emergencias','emergencia']
-].map(x=>`<button class="quick" data-service="${x[2]}"><span class="qicon">${x[0]}</span>${x[1]}</button>`).join('')}
+const STAGE1_ELEVATION_ANCHORS=[
+ [43.163668,-1.234870,170.2],[43.152103,-1.242169,265.0],[43.139785,-1.240182,324.4],[43.129554,-1.242366,344.7],
+ [43.121261,-1.243408,521.9],[43.115917,-1.237614,726.2],[43.104260,-1.239437,867.0],[43.091490,-1.243935,973.9],
+ [43.084113,-1.252092,1086.2],[43.077655,-1.262482,1094.2],[43.068260,-1.269020,1189.7],[43.057277,-1.266668,1231.1],
+ [43.047190,-1.264913,1321.4],[43.041941,-1.276306,1247.4],[43.036433,-1.290694,1340.9],[43.028320,-1.295898,1450.0],
+ [43.027185,-1.295453,1412.7],[43.026167,-1.305500,1277.4],[43.023584,-1.313762,1188.4],[43.020342,-1.321249,1073.3],
+ [43.014461,-1.317398,982.3],[43.008475,-1.319832,953.8]
+];
 
-function home(){currentView='home';setActive('home');app.innerHTML=`
-<section class="hero"><img class="home-logo" src="buen-camino-logo.png" alt="BUEN CAMINO"><p>33 etapas, mapa topográfico, GPS, servicios y ayuda práctica para el peregrino. Pensada exclusivamente para Android.</p><span class="pill">GRATUITA · ANDROID · V4.9.1 PRO</span></section>
-<section class="pro-banner"><strong>🗺 Cartografía topográfica</strong><span>Curvas de nivel, relieve y trazado GPS cuando está disponible.</span></section>
-<section class="section"><div class="section-head"><h2>Las 33 etapas</h2><button class="link-btn" data-nav="stages">Ver todas</button></div>${STAGES.slice(0,5).map(stageCard).join('')}</section>
-<button class="location-cta" id="whereBtn">📍 ¿DÓNDE ESTOY AHORA?<small>GPS del teléfono · alta precisión si Android la permite</small></button>
-<section class="section"><div class="section-head"><h2>Todo lo que usa un peregrino</h2></div><div class="quick-grid">${quickButtons()}</div></section>
-<section class="section"><div class="safety-card"><strong>⚠ Seguridad</strong><p>112 funciona como número europeo de emergencias. La cartografía es una ayuda: sigue siempre la señalización del Camino y las indicaciones oficiales.</p></div></section>`;bindCommon()}
+// Datos locales verificados para que Servicios siga siendo útil aunque falle Internet.
+// Se ampliarán etapa por etapa; no se inventan teléfonos ni webs.
+const LOCAL_SERVICES={1:[
+ {type:'alojamiento',name:'Gîte Kayola',lat:43.11780,lon:-1.23810,km:6.4,phone:'+33 6 38 26 97 38',website:'https://www.refuge-orisson.com/',address:'RD 428 · Saint-Michel',note:'Alojamiento de etapa. Reserva recomendable.'},
+ {type:'alojamiento',name:'Refuge Orisson',lat:43.1088654,lon:-1.2391822,km:8.0,phone:'+33 6 38 26 97 38',phone2:'+33 5 59 49 13 03',website:'https://www.refuge-orisson.com/',email:'refuge.orisson@wanadoo.fr',address:'RD 428 · Uhart-Cize',note:'Refugio y restaurante en la Ruta de Napoleón.'},
+ {type:'alojamiento',name:'Auberge Borda',lat:43.1014507,lon:-1.2389313,km:9.0,phone:'+33 6 61 92 97 43',website:'https://www.aubergeborda.com/',email:'aubergeborda@gmail.com',address:'D428 GR65 · Saint-Michel',hours:'Recepción 14:30–21:00',note:'Alojamiento de montaña con media pensión.'},
+ {type:'alojamiento',name:'Albergue de Peregrinos de Roncesvalles',lat:43.0099872,lon:-1.3216338,km:24.2,phone:'+34 948 760 000',phone2:'+34 948 760 029',website:'https://www.alberguederoncesvalles.com/',email:'info@alberguederoncesvalles.com',address:'Real Colegiata · Roncesvalles',note:'Albergue de peregrinos de la Real Colegiata.'},
+ {type:'comer',name:'Refuge Orisson · Restaurante',lat:43.1088654,lon:-1.2391822,km:8.0,phone:'+33 6 38 26 97 38',website:'https://www.refuge-orisson.com/',address:'RD 428 · Uhart-Cize',note:'Restaurante del refugio.'},
+ {type:'comer',name:'Casa Sabina · Restaurante',lat:43.0102,lon:-1.3195,km:24.2,phone:'+34 948 760 012',website:'https://casasabina.roncesvalles.es/',email:'casasabina@roncesvalles.es',address:'N-135 s/n · Roncesvalles',note:'Bar, restaurante y menú del peregrino.'},
+ {type:'farmacia',name:'Pharmacie Arreguy Olaizola',phone:'+33 5 59 37 02 81',address:'27 place Charles de Gaulle · Saint-Jean-Pied-de-Port',query:'Pharmacie Arreguy Olaizola Saint-Jean-Pied-de-Port'},
+ {type:'farmacia',name:'Pharmacie NAFARROA',phone:'+33 5 59 37 01 36',address:'7 avenue Jaï Alai · Saint-Jean-Pied-de-Port',query:'Pharmacie NAFARROA Saint-Jean-Pied-de-Port'},
+ {type:'salud',name:'Clinique médico-chirurgical Luro',phone:'+33 5 59 37 00 55',address:'Bourg · 64220 Ispoure',website:'https://www.eps-garazi.fr/',query:'Clinique Luro Ispoure'},
+ {type:'informacion',name:'Accueil des pèlerins',phone:'+33 5 59 37 05 09',address:'39 rue de la Citadelle · Saint-Jean-Pied-de-Port',website:'https://www.st-jean-pied-de-port.fr/decouvrir/sur-le-chemin-de-st-jacques/',note:'Credencial, sello e información al peregrino.'},
+ {type:'informacion',name:'Office de Tourisme',phone:'+33 5 59 37 03 57',address:'14 place Charles de Gaulle · Saint-Jean-Pied-de-Port',website:'https://www.st-jean-pied-de-port.fr/tourisme/office-de-tourisme/'},
+ {type:'ayuntamiento',name:'Mairie de Saint-Jean-Pied-de-Port',phone:'+33 5 59 37 00 92',address:'13 place Charles de Gaulle · Saint-Jean-Pied-de-Port',website:'https://www.st-jean-pied-de-port.fr/'},
+ {type:'ayuntamiento',name:'Real Colegiata de Roncesvalles · atención al peregrino',phone:'+34 948 760 000',address:'Roncesvalles · Navarra',website:'https://roncesvalles.es/'},
+]};
 
-function stages(){currentView='stages';setActive('stages');app.innerHTML=`<section class="section"><div class="section-head"><h2>Etapas del Camino Francés</h2></div><input class="search" id="stageSearch" placeholder="Buscar etapa o localidad…" autocomplete="off"><div id="stageList">${STAGES.map(stageCard).join('')}</div></section>`;bindCommon();document.getElementById('stageSearch').addEventListener('input',e=>{const q=e.target.value.toLowerCase().trim();document.getElementById('stageList').innerHTML=STAGES.filter(s=>(s.from+' '+s.to).toLowerCase().includes(q)).map(stageCard).join('')||'<div class="empty">No hay resultados.</div>';bindStageCards()})}
+const SERVICE_TYPES=[
+ ['🛏','alojamiento','Dormir'],['🍴','comer','Comer'],['💧','agua','Agua'],['✚','farmacia','Farmacia'],['❤','salud','Salud'],['🚕','taxi','Taxi'],
+ ['🚌','transporte','Bus/Tren'],['🛒','tienda','Tienda'],['🏧','cajero','Cajero'],['🚻','wc','WC'],['🚲','bici','Bicicleta'],['🟨','informacion','Credencial / info'],['🏛','ayuntamiento','Ayuntamiento']
+];
 
-function detail(n,tab='resumen'){const s=STAGES.find(x=>x.n===n);currentView=`detail-${n}`;setActive('stages');app.innerHTML=`<section class="detail-head"><div class="backline"><button id="backStages">‹ Volver</button><button class="fav ${favorites.has('stage-'+n)?'on':''}" data-fav="stage-${n}">♥</button></div><div class="eyebrow">ETAPA ${n}</div><h1>${esc(s.from)} → ${esc(s.to)}</h1><div class="detail-stats"><span>🚶 ${s.km.toFixed(1)} km</span><span>◷ ${s.h}</span><span>⛰ +${s.gain} m</span><span>▥ ${s.difficulty}</span></div></section><div class="detail-tabs">${['resumen','mapa','servicios','alojamientos'].map(t=>`<button data-tab="${t}" class="${tab===t?'active':''}">${t.toUpperCase()}</button>`).join('')}</div><div id="detailBody"></div>`;
-document.getElementById('backStages').onclick=stages;document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>detail(n,b.dataset.tab));bindFav();renderDetailBody(s,tab)}
+function setActive(k){document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.toggle('active',b.dataset.nav===k));}
+function stageCard(s){return `<article class="stage-card" data-stage="${s.n}"><div class="num">${s.n}</div><div><h3>${esc(s.from)} → ${esc(s.to)}</h3><div class="meta">${s.km.toFixed(1)} km · ${s.h} · ${esc(s.difficulty)}</div></div><b>›</b></article>`}
 
-function renderDetailBody(s,tab){const body=document.getElementById('detailBody');
- if(tab==='resumen'){
-   const stage1=s.n===1?`<div class="warning-card"><strong>⛰ Alta montaña</strong><p>Ruta de Napoleón. No recomendada entre noviembre y marzo. Altitud mínima publicada: 168 m; máxima: 1.450 m; desnivel publicado: 1.281 m.</p></div>`:'';
-   body.innerHTML=`<section class="section"><div class="stat-grid"><div class="stat">🚶<strong>${s.km.toFixed(1)} km</strong><span>Distancia plan</span></div><div class="stat">◷<strong>${s.h}</strong><span>Tiempo</span></div><div class="stat">⛰<strong>+${s.gain} m</strong><span>Desnivel</span></div><div class="stat">▥<strong>${s.difficulty}</strong><span>Dificultad</span></div></div>${stage1}<h2>Preparación de etapa</h2><div class="checklist"><span>💧 Agua y comida</span><span>🌦 Meteorología</span><span>🔋 Batería / powerbank</span><span>🩹 Botiquín</span><span>🪪 Credencial</span><span>🧥 Capa y abrigo</span></div><h2>Mapa topográfico</h2><div class="map-toolbar inline-toolbar"><button id="routeBtn" class="map-chip ${routeVisible?'active':''}">🟨 Ruta ${routeVisible?'ON':'OFF'}</button><button id="summaryBigMapBtn" class="map-chip map-chip-primary">⛶ AMPLIAR MAPA</button></div><div id="stageMap" class="mapbox map-preview" role="button" aria-label="Abrir mapa grande y perfil de desnivel"></div><div class="map-note"><strong>Pulsa “AMPLIAR MAPA”</strong> para abrir mapa grande + perfil de desnivel. Base topográfica con curvas de nivel: OpenTopoMap. Las autopistas se resaltan en azul cuando aparecen en los datos abiertos.</div></section>`;setTimeout(async()=>{await makeMap(s.n,'stageMap',false);bindMapToolbar(s.n);const open=()=>openStageBigMap(s.n);const b=document.getElementById('summaryBigMapBtn');if(b)b.onclick=open},0)
- } else if(tab==='mapa'){
-   body.innerHTML=`<div id="mapWorkspace" class="map-workspace"><div class="map-shell map-mode"><div id="stageMapTall" class="mapbox tall"></div><div class="map-floats"><button id="routeBtn" class="map-float ${routeVisible?'active':''}">🟨 RUTA ${routeVisible?'ON':'OFF'}</button><button id="poisBtn" class="map-float">📌 SERVICIOS</button><button id="locateFloat" class="map-float">📍 GPS</button><button id="rotateMapBtn" class="map-float">↻ HORIZONTAL</button><button id="fullscreenMapBtn" class="map-float map-main-action">⛶ MAPA GRANDE</button></div></div><aside id="elevationPanel" class="elevation-panel"><div class="elevation-head"><div><span>PERFIL DE DESNIVEL</span><strong id="elevationReadout">Toca o desliza el dedo</strong></div><small id="elevationSource">Preparando perfil…</small></div><div id="elevationChart" class="elevation-chart"><div class="elevation-loading">Cargando altitud…</div></div></aside></div><section class="section map-actions"><button class="location-cta full" id="locateOnMap">📍 MOSTRAR MI UBICACIÓN</button><div id="mapStatus" class="route-source">Cargando trazado detallado · puntos de Camino…</div><div id="poiLegend" class="poi-legend"></div></section>`;setTimeout(async()=>{await makeMap(s.n,'stageMapTall',false,true);document.getElementById('locateOnMap').onclick=locateUser;document.getElementById('locateFloat').onclick=locateUser;document.getElementById('fullscreenMapBtn').onclick=enterMapFullscreen;document.getElementById('rotateMapBtn').onclick=toggleManualLandscape;bindMapToolbar(s.n);autoFocusLandscape()},0)
- } else if(tab==='servicios'){
-   body.innerHTML=`<section class="section"><div class="emergency"><strong>⚠ Emergencias: 112</strong>Número europeo de emergencias, válido también en Francia.</div><div class="section-head"><h2>Servicios reales de la etapa</h2><button class="aemet-btn" id="aemetBtn">🌦 AEMET</button></div><p class="section-help">Pulsa una categoría. BUEN CAMINO usa Open Pilgrimages/OpenStreetMap y, cuando hace falta, consulta OpenStreetMap bajo demanda. Sin APIs de pago.</p><div class="stage-service-grid">${stageServiceButtons()}</div><div id="stageServiceResults" class="stage-service-results"><div class="empty">Elige un servicio para ver teléfono, ubicación, web, horario y accesos al mapa cuando estén publicados.</div></div></section>`;
-   document.getElementById('aemetBtn').onclick=()=>openAemetForStage(s.n);bindStageServiceButtons(s.n)
- } else {
-   body.innerHTML=`<section class="section"><div class="section-head"><h2>Alojamientos</h2><button class="aemet-btn" id="aemetBtn">🌦 AEMET</button></div><div class="info-card"><strong>Datos abiertos y verificables</strong><p>Mostramos teléfono, ubicación, web y horario cuando están publicados. No inventamos precios ni disponibilidad.</p></div><div id="stageAccommodationResults"><div class="elevation-loading">Cargando alojamientos de la etapa…</div></div></section>`;
-   document.getElementById('aemetBtn').onclick=()=>openAemetForStage(s.n);loadStageServiceDirectory(s.n,'alojamiento','stageAccommodationResults')
- }}
-
-function serviceCard(x){return `<article class="service-card"><div><span class="badge">${esc(x.type)}</span><h3>${esc(x.name)}</h3><p>${esc(x.sub)}</p><p>${esc(x.note)}</p>${x.phone?`<div class="service-actions"><a class="mini-btn phone-link" href="tel:${esc(x.phone)}">📞 ${esc(x.phone)}</a></div>`:''}</div><div><div class="price">${esc(x.price)}</div><button class="fav ${favorites.has(x.id)?'on':''}" data-fav="${x.id}">♥</button></div></article>`}
-
-const STAGE_SERVICE_SPECS={
- alojamiento:{label:'Dormir',icon:'🛏',types:['accommodation','camping'],osm:['["tourism"~"^(hostel|hotel|guest_house|alpine_hut|camp_site)$"]']},
- restaurante:{label:'Comer',icon:'🍴',types:['food'],osm:['["amenity"~"^(restaurant|cafe|bar|fast_food)$"]']},
- fuente:{label:'Agua',icon:'💧',types:['water_source'],osm:['["amenity"="drinking_water"]','["natural"="spring"]']},
- farmacia:{label:'Farmacia',icon:'✚',types:['medical'],osm:['["amenity"="pharmacy"]']},
- salud:{label:'Salud',icon:'❤',types:['medical'],osm:['["amenity"~"^(clinic|doctors|hospital)$"]']},
- taxi:{label:'Taxi',icon:'🚕',types:['transport'],osm:['["amenity"="taxi"]']},
- transporte:{label:'Bus / Tren',icon:'🚌',types:['transport'],osm:['["amenity"="bus_station"]','["highway"="bus_stop"]','["railway"~"^(station|halt)$"]']},
- supermercado:{label:'Tienda',icon:'🛒',types:['supply'],osm:['["shop"~"^(supermarket|convenience|general)$"]']},
- cajero:{label:'Cajero',icon:'🏧',types:['supply'],osm:['["amenity"~"^(atm|bank)$"]']},
- lavanderia:{label:'Lavandería',icon:'🧺',types:['supply'],osm:['["shop"="laundry"]','["amenity"="laundry"]']},
- wc:{label:'WC',icon:'🚻',types:['supply'],osm:['["amenity"="toilets"]']},
- bicicleta:{label:'Bicicleta',icon:'🚲',types:['supply'],osm:['["shop"="bicycle"]','["amenity"="bicycle_repair_station"]']},
- sellos:{label:'Sellos',icon:'🟨',types:['credential_stamp','information','sacred_site'],osm:['["tourism"="information"]']},
- policia:{label:'Policía',icon:'🛡',types:['information'],osm:['["amenity"="police"]']},
- ayuntamiento:{label:'Ayuntamiento',icon:'🏛',types:['information'],osm:['["amenity"="townhall"]']}
-};
-function stageServiceButtons(){return Object.entries(STAGE_SERVICE_SPECS).map(([k,v])=>`<button class="stage-service-btn" data-stage-service="${k}"><span>${v.icon}</span>${v.label}</button>`).join('')}
-function bindStageServiceButtons(n){document.querySelectorAll('[data-stage-service]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-stage-service]').forEach(x=>x.classList.toggle('active',x===b));loadStageServiceDirectory(n,b.dataset.stageService,'stageServiceResults')})}
-function mapsUrl(lat,lon,mode='map'){const c=`${Number(lat).toFixed(6)},${Number(lon).toFixed(6)}`;if(mode==='satellite')return `https://www.google.com/maps/@?api=1&map_action=map&center=${encodeURIComponent(c)}&zoom=18&basemap=satellite`;return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c)}`}
-function earthUrl(lat,lon){return `https://earth.google.com/web/search/${Number(lat).toFixed(6)},${Number(lon).toFixed(6)}`}
-function osmUrl(lat,lon){return `https://www.openstreetmap.org/?mlat=${Number(lat).toFixed(6)}&mlon=${Number(lon).toFixed(6)}#map=18/${Number(lat).toFixed(6)}/${Number(lon).toFixed(6)}`}
-function openAemetForStage(n){const s=STAGES.find(x=>x.n===n);if(n===1){window.open('https://www.aemet.es/es/eltiempo/prediccion/municipios/grafica/todas/orreaga-roncesvalles-id31211','_blank','noopener');return}const q=s?`${s.to} AEMET`:'AEMET';window.open('https://www.aemet.es/es/eltiempo/prediccion/municipios','_blank','noopener');toast(`AEMET · busca ${q}`)}
-function stageFeatureItems(n,key){
-  const spec=STAGE_SERVICE_SPECS[key];if(!spec||!remoteWaypoints)return[];
-  const out=[];
-  for(const f of remoteWaypoints.features||[]){
-    if(!waypointStageMatch(f,n)||f.geometry?.type!=='Point')continue;
-    const p=f.properties||{},type=p.type||'information';
-    if(!spec.types.includes(type))continue;
-    const [lon,lat]=f.geometry.coordinates||[];if(!Number.isFinite(lat)||!Number.isFinite(lon))continue;
-    const name=p.name?.es||p.name?.en||p.name||TYPE_LABEL[type]||spec.label;
-    const c=directContact(p);
-    out.push({id:p.osmId||`${lat},${lon}`,name,type,lat,lon,km:p.kmFromStart,osmId:p.osmId||'',phone:c.phone,website:c.website,opening:c.opening,address:'',source:'Open Pilgrimages / OSM'});
-  }
-  return out;
-}
-function routeBBox(n,pad=.018){const b=STAGE_BBOX[n];if(b)return{south:b.minLat-pad,west:b.minLon-pad,north:b.maxLat+pad,east:b.maxLon+pad};if(currentStageRouteSegs?.length){const pts=currentStageRouteSegs.flat();if(pts.length){const lats=pts.map(p=>p[0]),lons=pts.map(p=>p[1]);return{south:Math.min(...lats)-pad,west:Math.min(...lons)-pad,north:Math.max(...lats)+pad,east:Math.max(...lons)+pad}}return null}
-const overpassCache=new Map();
-async function overpassServices(n,key){
-  const spec=STAGE_SERVICE_SPECS[key],b=routeBBox(n);if(!spec||!b||!spec.osm?.length)return[];
-  const ck=`${n}:${key}`;if(overpassCache.has(ck))return overpassCache.get(ck);
-  const bbox=`${b.south},${b.west},${b.north},${b.east}`;
-  const selectors=spec.osm.map(x=>`nwr${x}(${bbox});`).join('');
-  const q=`[out:json][timeout:18];(${selectors});out center tags;`;
-  try{
-    const r=await fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q),{headers:{Accept:'application/json'}});
-    if(!r.ok)throw new Error('Overpass');
-    const j=await r.json(),items=[];
-    for(const e of j.elements||[]){
-      const lat=Number(e.lat??e.center?.lat),lon=Number(e.lon??e.center?.lon);if(!Number.isFinite(lat)||!Number.isFinite(lon))continue;
-      const t=e.tags||{},name=t.name||t['name:es']||spec.label;
-      const phone=cleanPhone(t['contact:phone']||t.phone||t['contact:mobile']||t.mobile);
-      const website=String(t['contact:website']||t.website||'').trim(),opening=String(t.opening_hours||'').trim();
-      const address=[t['addr:street'],t['addr:housenumber'],t['addr:city']].filter(Boolean).join(' ');
-      items.push({id:`${e.type}/${e.id}`,osmId:`${e.type}/${e.id}`,name,type:key,lat,lon,phone,website,opening,address,source:'OpenStreetMap'});
-      if(items.length>=60)break;
-    }
-    overpassCache.set(ck,items);return items;
-  }catch{return[]}
-}
-function dedupeServiceItems(items){const seen=new Set(),out=[];for(const x of items){const key=x.osmId||`${String(x.name).toLowerCase()}|${x.lat.toFixed(4)}|${x.lon.toFixed(4)}`;if(seen.has(key))continue;seen.add(key);out.push(x)}return out}
-function serviceDirectoryCard(x){
-  const c={phone:x.phone,website:x.website,opening:x.opening};
-  const km=Number.isFinite(Number(x.km))?`<span class="service-km">Km ${Number(x.km).toFixed(1)} del Camino</span>`:'';
-  const addr=x.address?`<div class="service-address">📍 ${esc(x.address)}</div>`:'';
-  const contact=(c.phone||c.website||c.opening)?contactHtml(c):(x.osmId?`<button class="poi-contact-load" data-osm="${esc(x.osmId)}">📞 CARGAR CONTACTO</button><small>Teléfono/web/horario si están publicados en OSM.</small>`:'<span class="poi-no-phone">Sin contacto publicado.</span>');
-  return `<article class="service-rich-card"><div class="service-rich-main"><div class="service-rich-top"><span class="badge">${esc(x.type||'servicio')}</span>${km}</div><h3>${esc(x.name||'Servicio')}</h3>${addr}<div class="poi-contact">${contact}</div><div class="service-nav-actions"><a href="${osmUrl(x.lat,x.lon)}" target="_blank" rel="noopener">🗺 OSM</a><a href="${mapsUrl(x.lat,x.lon)}" target="_blank" rel="noopener">📍 Google Maps</a><a href="${mapsUrl(x.lat,x.lon,'satellite')}" target="_blank" rel="noopener">🛰 Satélite</a><a href="${earthUrl(x.lat,x.lon)}" target="_blank" rel="noopener">🌍 Earth</a></div></div><small class="service-source">${esc(x.source||'Datos abiertos')}</small></article>`
-}
-async function loadStageServiceDirectory(n,key,targetId){
-  const host=document.getElementById(targetId);if(!host)return;const spec=STAGE_SERVICE_SPECS[key];if(!spec){host.innerHTML='<div class="empty">Categoría no disponible.</div>';return}
-  host.innerHTML=`<div class="elevation-loading">Buscando ${esc(spec.label.toLowerCase())} en datos abiertos…</div>`;
-  try{await loadOpenPilgrimages()}catch{}
-  const base=stageFeatureItems(n,key);
-  const extra=await overpassServices(n,key);
-  const items=dedupeServiceItems([...base,...extra]).slice(0,60);
-  if(!items.length){host.innerHTML=`<div class="empty"><div class="big">${spec.icon}</div><p>No hay datos abiertos suficientes en esta etapa para ${esc(spec.label.toLowerCase())}. No inventaremos establecimientos ni teléfonos.</p></div>`;return}
-  host.innerHTML=`<div class="service-results-head"><strong>${items.length} resultados</strong><span>Teléfono, web y horario solo cuando la fuente los publica.</span></div>${items.map(serviceDirectoryCard).join('')}`;
+function home(){cleanupMaps();currentView='home';currentStageNo=null;setActive('home');app.innerHTML=`<section class="hero"><img class="home-logo" src="buen-camino-logo.png" alt="BUEN CAMINO"><p>Guía gratuita del Camino Francés. Cartografía, desnivel, GPS, servicios, alojamientos y ayuda práctica para el peregrino.</p><span class="pill">V5.0 ESTABLE · SIN APIS DE PAGO</span></section><section class="section"><div class="section-head"><h2>Las 33 etapas</h2><button class="link-btn" data-nav="stages">Ver todas</button></div>${STAGES.slice(0,5).map(stageCard).join('')}</section><section class="section"><h2>Accesos rápidos</h2><div class="service-grid">${SERVICE_TYPES.slice(0,9).map(x=>`<button class="service-btn" data-quick="${x[1]}"><span>${x[0]}</span>${x[2]}</button>`).join('')}</div></section>`;bindCommon();}
+function stages(){cleanupMaps();currentView='stages';setActive('stages');app.innerHTML=`<section class="section"><h2>Etapas del Camino Francés</h2><input id="stageSearch" style="width:100%;padding:12px;border:1px solid #dce3eb;border-radius:12px;margin-bottom:12px" placeholder="Buscar localidad…"> <div id="stageList">${STAGES.map(stageCard).join('')}</div></section>`;bindCommon();document.getElementById('stageSearch').oninput=e=>{const q=e.target.value.toLowerCase();document.getElementById('stageList').innerHTML=STAGES.filter(s=>(s.from+' '+s.to).toLowerCase().includes(q)).map(stageCard).join('');bindStageCards();};}
+function detail(n,tab='resumen'){cleanupMaps();currentStageNo=n;currentView=`detail-${n}`;setActive('stages');const s=STAGES.find(x=>x.n===n);app.innerHTML=`<section class="detail-head"><div class="backline"><button id="backBtn">‹ Volver</button><button id="favBtn">${favorites.has('stage-'+n)?'♥':'♡'}</button></div><div class="eyebrow">ETAPA ${n}</div><h1>${esc(s.from)} → ${esc(s.to)}</h1><div class="detail-stats"><span>🚶 ${s.km.toFixed(1)} km</span><span>◷ ${s.h}</span><span>⛰ +${s.gain} m</span><span>▥ ${esc(s.difficulty)}</span></div></section><div class="detail-tabs">${['resumen','mapa','servicios','alojamientos'].map(t=>`<button data-tab="${t}" class="${t===tab?'active':''}">${t.toUpperCase()}</button>`).join('')}</div><div id="detailBody"></div>`;document.getElementById('backBtn').onclick=stages;document.getElementById('favBtn').onclick=()=>{const k='stage-'+n;favorites.has(k)?favorites.delete(k):favorites.add(k);save();detail(n,tab)};document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>detail(n,b.dataset.tab));renderDetail(s,tab);}
+function renderDetail(s,tab){const body=document.getElementById('detailBody');if(tab==='resumen'){body.innerHTML=`<section class="section"><div class="stat-grid"><div class="stat">🚶<strong>${s.km.toFixed(1)} km</strong><span>Distancia</span></div><div class="stat">◷<strong>${s.h}</strong><span>Tiempo</span></div><div class="stat">⛰<strong>+${s.gain} m</strong><span>Desnivel</span></div><div class="stat">▥<strong>${esc(s.difficulty)}</strong><span>Dificultad</span></div></div>${s.n===1?'<div class="warning"><strong>⛰ Alta montaña.</strong> Ruta de Napoleón. Revisa meteorología y avisos antes de salir; con mala visibilidad, nieve, hielo o tormenta, prioriza la alternativa segura y las indicaciones oficiales.</div>':''}<h2>Preparación</h2><div class="checklist"><span>💧 Agua y comida</span><span>🌦 Meteorología</span><span>🔋 Batería / powerbank</span><span>🩹 Botiquín</span><span>🪪 Credencial</span><span>🧥 Capa y abrigo</span></div><h2 style="margin-top:22px">Mapa topográfico</h2><div class="map-toolbar"><button id="summaryRoute" class="map-chip ${routeVisible?'active':''}">🟨 Ruta ${routeVisible?'ON':'OFF'}</button><button id="summaryBig" class="map-chip primary">⛶ AMPLIAR MAPA</button></div><div id="summaryMap" class="bc-map"></div><div class="map-note">El mapa usa un motor propio de BUEN CAMINO: no depende de Leaflet ni de librerías externas. Si OpenTopoMap falla, cada tesela intenta cargar OpenStreetMap como respaldo.</div></section>`;setTimeout(()=>{mainMap=buildStageMap('summaryMap',s.n,false);document.getElementById('summaryRoute').onclick=()=>toggleRoute(document.getElementById('summaryRoute'));document.getElementById('summaryBig').onclick=()=>openFocusMap(s.n);},0);}
+else if(tab==='mapa'){body.innerHTML=`<div class="map-workspace"><div class="map-shell"><div id="stageMap" class="bc-map tall"></div><div class="map-floats"><button id="routeFloat" class="map-float ${routeVisible?'active':''}">🟨 RUTA ${routeVisible?'ON':'OFF'}</button><button id="servicesFloat" class="map-float">📌 SERVICIOS</button><button id="gpsFloat" class="map-float">📍 GPS</button><button id="focusFloat" class="map-float main">⛶ MAPA GRANDE</button></div></div><aside class="elevation-panel"><div class="elevation-head"><div><span>PERFIL DE DESNIVEL</span><strong id="elevReadout">Toca o desliza</strong></div><small>perfil compacto</small></div><div id="elevationChart" class="elevation-chart"></div></aside></div>`;setTimeout(()=>{mainMap=buildStageMap('stageMap',s.n,false);setupProfile('elevationChart',s.n,mainMap);document.getElementById('routeFloat').onclick=()=>toggleRoute(document.getElementById('routeFloat'));document.getElementById('servicesFloat').onclick=()=>showMapServices(s.n,mainMap);document.getElementById('gpsFloat').onclick=()=>locate(mainMap);document.getElementById('focusFloat').onclick=()=>openFocusMap(s.n);},0);}
+else if(tab==='servicios'){renderServicesTab(s.n,false)}
+else renderServicesTab(s.n,true);
 }
 
-function favoritesView(){currentView='favorites';setActive('favorites');const st=[...favorites].filter(x=>x.startsWith('stage-')).map(x=>STAGES.find(s=>s.n===Number(x.split('-')[1]))).filter(Boolean);app.innerHTML=`<section class="section"><div class="section-head"><h2>Favoritos</h2></div>${st.length?st.map(stageCard).join(''):'<div class="empty"><div class="big">♡</div><p>Guarda etapas y servicios con el corazón.</p></div>'}</section>`;bindStageCards()}
-function myCamino(){currentView='mycamino';setActive('mycamino');const done=[...doneStages].map(n=>STAGES.find(s=>s.n===n)).filter(Boolean);const km=done.reduce((a,s)=>a+s.km,0),pct=Math.round(doneStages.size/STAGES.length*100);app.innerHTML=`<section class="section"><h2>Mi Camino</h2><div class="progress-card"><strong>${doneStages.size} de 33 etapas</strong><div class="progress-track"><div class="progress-bar" style="width:${pct}%"></div></div><div class="meta">${km.toFixed(1)} km registrados de ${kmTotal().toFixed(1)} km</div></div><h2>Marcar etapas realizadas</h2>${STAGES.map(s=>`<div class="my-stage" data-done="${s.n}"><button class="check ${doneStages.has(s.n)?'done':''}">${doneStages.has(s.n)?'✓':''}</button><div><strong>Etapa ${s.n}</strong><div class="meta">${esc(s.from)} → ${esc(s.to)}</div></div></div>`).join('')}</section>`;document.querySelectorAll('[data-done]').forEach(r=>r.onclick=()=>{const n=Number(r.dataset.done);doneStages.has(n)?doneStages.delete(n):doneStages.add(n);save();myCamino()})}
+function renderServicesTab(n,onlyLodging){const body=document.getElementById('detailBody');const buttons=(onlyLodging?[SERVICE_TYPES[0]]:SERVICE_TYPES);body.innerHTML=`<section class="section"><div class="section-head"><h2>${onlyLodging?'Alojamientos':'Servicios de la etapa'}</h2>${!onlyLodging?'<button id="aemetBtn" class="aemet-btn">🌦 AEMET</button>':''}</div><p class="map-note">Esta versión prioriza datos locales verificados. Los teléfonos y webs se muestran solo cuando están publicados en fuentes oficiales o del propio establecimiento.</p><div class="service-grid">${buttons.map(x=>`<button class="service-btn" data-service="${x[1]}"><span>${x[0]}</span>${x[2]}</button>`).join('')}</div><div id="serviceResults"></div></section>`;document.querySelectorAll('[data-service]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-service]').forEach(x=>x.classList.toggle('active',x===b));showServiceList(n,b.dataset.service)});if(onlyLodging)document.querySelector('[data-service="alojamiento"]')?.click();const a=document.getElementById('aemetBtn');if(a)a.onclick=()=>window.open('https://www.aemet.es/es/eltiempo/prediccion/municipios/grafica/todas/orreaga-roncesvalles-id31211','_blank','noopener');}
+function showServiceList(n,type){const host=document.getElementById('serviceResults');let items=(LOCAL_SERVICES[n]||[]).filter(x=>x.type===type);if(!items.length){host.innerHTML=`<div class="empty"><b>Datos verificados pendientes para esta categoría.</b><p>No vamos a inventar teléfonos ni establecimientos. Se incorporarán etapa por etapa.</p><a href="https://www.openstreetmap.org/search?query=${encodeURIComponent(type+' Camino de Santiago')}" target="_blank" rel="noopener">Buscar en OpenStreetMap</a></div>`;return}host.innerHTML=items.map(serviceCard).join('');}
+function serviceCard(x){const q=x.query||x.name;const mapLink=x.lat?mapsUrl(x.lat,x.lon):`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;return `<article class="service-card"><span class="kind">${esc(x.type)}</span><h3>${esc(x.name)}</h3>${x.km!=null?`<p><b>Km ${Number(x.km).toFixed(1)}</b> del Camino</p>`:''}${x.address?`<p>📍 ${esc(x.address)}</p>`:''}${x.hours?`<p>🕒 ${esc(x.hours)}</p>`:''}${x.note?`<p>${esc(x.note)}</p>`:''}<div class="service-contact">${x.phone?`<a class="call" href="tel:${esc(x.phone.replace(/\s/g,''))}">📞 ${esc(x.phone)}</a>`:''}${x.phone2?`<a class="call" href="tel:${esc(x.phone2.replace(/\s/g,''))}">📞 ${esc(x.phone2)}</a>`:''}${x.website?`<a class="web" href="${esc(x.website)}" target="_blank" rel="noopener">🌐 Web</a>`:''}${x.email?`<a href="mailto:${esc(x.email)}">✉ Email</a>`:''}<a href="${mapLink}" target="_blank" rel="noopener">📍 Mapa</a>${x.lat?`<a href="${earthUrl(x.lat,x.lon)}" target="_blank" rel="noopener">🌍 Earth</a>`:''}</div></article>`;}
 
-function geoJSONSegments(gj){const out=[];const add=line=>{const seg=(line||[]).map(c=>[Number(c[1]),Number(c[0]),c.length>2?Number(c[2]):null]).filter(c=>Number.isFinite(c[0])&&Number.isFinite(c[1]));if(seg.length>1)out.push(seg)};(gj?.features||[]).forEach(f=>{const g=f?.geometry;if(!g)return;if(g.type==='LineString')add(g.coordinates);else if(g.type==='MultiLineString')(g.coordinates||[]).forEach(add)});return out}
-async function fetchJson(url){
-  const ctrl=new AbortController();
-  const timer=setTimeout(()=>ctrl.abort(),6500);
-  try{
-    const r=await fetch(url,{mode:'cors',cache:'force-cache',signal:ctrl.signal});
-    if(!r.ok)throw new Error(String(r.status));
-    return await r.json();
-  }finally{clearTimeout(timer)}
-}
-async function loadOpenPilgrimages(){const jobs=[];if(!remoteRoute)jobs.push(fetchJson(ROUTE_URL).then(x=>remoteRoute=x));if(!remoteWaypoints)jobs.push(fetchJson(WAYPOINTS_URL).then(x=>remoteWaypoints=x));if(!remoteStages)jobs.push(fetchJson(STAGES_URL).then(x=>remoteStages=x));await Promise.allSettled(jobs)}
-function inBox(lat,lon,b){return lat>=b.minLat&&lat<=b.maxLat&&lon>=b.minLon&&lon<=b.maxLon}
-function stageSegmentsFromRemote(n){if(!remoteRoute)return[];const all=geoJSONSegments(remoteRoute);const b=STAGE_BBOX[n];if(!b)return[];return all.map(seg=>seg.filter(p=>inBox(p[0],p[1],b))).filter(seg=>seg.length>1)}
-function localStage(n){const x=(typeof LOCAL_VERIFIED_STAGE_ROUTES!=='undefined')?LOCAL_VERIFIED_STAGE_ROUTES[n]:null;return x&&x.length>1?[x.map(p=>[p[0],p[1],null])]:[]}
-function routeStyleForZoom(z){
-  // Los puntos crecen al acercar el zoom: visibles caminando sin tapar el sendero de lejos.
-  if(z>=17)return{radius:10.0,line:3.2,halo:6.2};
-  if(z>=16)return{radius:8.8,line:3.0,halo:5.8};
-  if(z>=15)return{radius:7.4,line:2.7,halo:5.2};
-  if(z>=14)return{radius:6.3,line:2.5,halo:4.8};
-  if(z>=12)return{radius:4.5,line:2.25,halo:4.3};
-  if(z>=10)return{radius:3.8,line:2.0,halo:3.9};
-  return{radius:3.2,line:1.8,halo:3.5};
-}
-function updateRouteStyle(map){
-  if(!map)return;
-  const st=routeStyleForZoom(map.getZoom());
-  routeDotMarkers.forEach(m=>{try{m.setRadius(st.radius);m.setStyle({weight:Math.max(1.1,st.radius*.22)})}catch{}});
-  routeGuideLines.forEach(l=>{try{l.setStyle({weight:st.line,opacity:.92})}catch{}});
-  routeHaloLines.forEach(l=>{try{l.setStyle({weight:st.halo,opacity:.72})}catch{}});
-}
-function nearestElevationIndex(lat,lon){
-  if(!currentElevationSamples?.length)return -1;
-  let best=0,bd=Infinity;
-  for(let i=0;i<currentElevationSamples.length;i++){
-    const p=currentElevationSamples[i],d=(p.lat-lat)**2+(p.lon-lon)**2;
-    if(d<bd){bd=d;best=i}
-  }
-  return best;
-}
-function handleRouteDotClick(lat,lon,marker){
-  const idx=nearestElevationIndex(lat,lon),p=idx>=0?currentElevationSamples[idx]:null;
-  if(idx>=0&&elevationSelector)elevationSelector(idx,true);
-  const km=p?`Km ${p.km.toFixed(1)}`:'Punto de ruta';
-  const alt=p?`${Math.round(p.ele)} m de altitud`:'Altitud no disponible';
-  const html=`<div class="route-point-popup"><strong>🟨 ${km}</strong><span>${alt}</span><small>${Number(lat).toFixed(6)}, ${Number(lon).toFixed(6)}</small><div class="route-point-actions"><a href="${mapsUrl(lat,lon,'satellite')}" target="_blank" rel="noopener">🛰 Satélite</a><a href="${earthUrl(lat,lon)}" target="_blank" rel="noopener">🌍 Google Earth</a><a href="${osmUrl(lat,lon)}" target="_blank" rel="noopener">🗺 OSM</a></div></div>`;
-  marker.bindPopup(html,{maxWidth:260}).openPopup();
-}
-function routeLayers(map,segs){
-  const g=L.featureGroup();
-  const renderer=L.canvas({padding:.55});
-  routeDotMarkers=[];routeGuideLines=[];routeHaloLines=[];
-  segs.forEach(seg=>{
-    const halo=L.polyline(seg,{renderer,color:'#fff7cf',weight:4.3,opacity:.68,lineCap:'round',lineJoin:'round',interactive:false}).addTo(g);
-    const guide=L.polyline(seg,{renderer,color:'#062b65',weight:2.25,opacity:.94,lineCap:'round',lineJoin:'round',interactive:false}).addTo(g);
-    routeHaloLines.push(halo);routeGuideLines.push(guide);
-    const targetDots=360;
-    const step=Math.max(1,Math.ceil(seg.length/targetDots));
-    for(let i=0;i<seg.length;i+=step){
-      const pt=seg[i];
-      const m=L.circleMarker(pt,{renderer,radius:4.8,color:'#062b65',weight:1.2,fillColor:'#ffc400',fillOpacity:1,interactive:true,bubblingMouseEvents:false}).addTo(g);
-      m.on('click',()=>handleRouteDotClick(pt[0],pt[1],m));
-      routeDotMarkers.push(m);
-    }
-    if(seg.length>1){
-      const pt=seg[seg.length-1];
-      const m=L.circleMarker(pt,{renderer,radius:4.8,color:'#062b65',weight:1.2,fillColor:'#ffc400',fillOpacity:1,interactive:true,bubblingMouseEvents:false}).addTo(g);
-      m.on('click',()=>handleRouteDotClick(pt[0],pt[1],m));
-      routeDotMarkers.push(m);
-    }
-  });
-  g.addTo(map);
-  updateRouteStyle(map);
-  map.on('zoomend',()=>updateRouteStyle(map));
-  return g
-}
-function baseLayers(map){
-  // OpenStreetMap queda por debajo como respaldo invisible: si OpenTopoMap tarda
-  // o falla, el peregrino nunca ve un rectángulo gris.
-  const fallback=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    maxZoom:19,attribution:'© OpenStreetMap contributors'
-  });
-  const topo=L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{
-    maxZoom:17,attribution:'Kartendaten © OpenStreetMap-Mitwirkende, SRTM | Kartendarstellung © OpenTopoMap (CC-BY-SA)'
-  });
-  const topoGroup=L.layerGroup([fallback,topo]).addTo(map);
-  const osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'});
-  let errors=0,notified=false;
-  topo.on('tileerror',()=>{
-    errors++;
-    if(errors>=6&&!notified){
-      notified=true;
-      try{topoGroup.removeLayer(topo)}catch{}
-      toast('Topográfico no respondió; mostramos OpenStreetMap como respaldo.');
-    }
-  });
-  topo.on('load',()=>{errors=0});
-  L.control.layers({'Topográfico · curvas de nivel':topoGroup,'Calles · OpenStreetMap':osm},null,{position:'topright',collapsed:true}).addTo(map);
-  L.control.scale({imperial:false,position:'bottomleft'}).addTo(map);
-  return{topo,topoGroup,fallback,osm}
+/* ---------- Motor de mapa propio ---------- */
+function ll2world(lat,lon,z){const s=256*Math.pow(2,z),sin=Math.sin(lat*Math.PI/180);return{x:(lon+180)/360*s,y:(.5-Math.log((1+sin)/(1-sin))/(4*Math.PI))*s};}
+function world2ll(x,y,z){const s=256*Math.pow(2,z),lon=x/s*360-180,n=Math.PI-2*Math.PI*y/s,lat=180/Math.PI*Math.atan(.5*(Math.exp(n)-Math.exp(-n)));return{lat,lon};}
+class BCMap{
+ constructor(el,opts={}){this.el=typeof el==='string'?document.getElementById(el):el;this.zoom=opts.zoom||11;this.center={lat:opts.lat||43.08,lon:opts.lon||-1.27};this.layer=opts.layer||'topo';this.route=[];this.routeOn=routeVisible;this.services=[];this.extraLines=[];this.selectedRouteIndex=-1;this.onRoutePoint=null;this._raf=0;this._build();this._bind();this.render();}
+ _build(){this.el.innerHTML='<div class="bc-tiles"></div><svg class="bc-overlay"></svg><div class="bc-markers"></div><div class="bc-map-controls"><button data-z="1">+</button><button data-z="-1">−</button></div><button class="bc-layer" title="Cambiar mapa">▱</button><div class="bc-scale"></div><div class="bc-map-msg">Cargando mapa…</div>';this.tiles=this.el.querySelector('.bc-tiles');this.svg=this.el.querySelector('.bc-overlay');this.markers=this.el.querySelector('.bc-markers');this.scale=this.el.querySelector('.bc-scale');this.msg=this.el.querySelector('.bc-map-msg');this.popup=null;}
+ _bind(){this.el.querySelectorAll('[data-z]').forEach(b=>b.onclick=e=>{e.stopPropagation();this.setZoom(this.zoom+Number(b.dataset.z));});this.el.querySelector('.bc-layer').onclick=e=>{e.stopPropagation();this.layer=this.layer==='topo'?'osm':'topo';this.render();toast(this.layer==='topo'?'Mapa topográfico':'Mapa de calles');};let start=null,cp=null,moved=false;this.el.addEventListener('pointerdown',e=>{if(e.target.closest('button,a,.route-popup'))return;this.el.setPointerCapture?.(e.pointerId);start={x:e.clientX,y:e.clientY};cp=ll2world(this.center.lat,this.center.lon,this.zoom);moved=false;});this.el.addEventListener('pointermove',e=>{if(!start)return;const dx=e.clientX-start.x,dy=e.clientY-start.y;if(Math.abs(dx)+Math.abs(dy)>5)moved=true;const ll=world2ll(cp.x-dx,cp.y-dy,this.zoom);this.center=ll;this.requestRender();});const end=()=>{start=null;cp=null};this.el.addEventListener('pointerup',end);this.el.addEventListener('pointercancel',end);this.el.addEventListener('dblclick',e=>{e.preventDefault();this.setZoom(this.zoom+1)});window.addEventListener('resize',()=>this.requestRender(),{passive:true});}
+ requestRender(){if(this._raf)return;this._raf=requestAnimationFrame(()=>{this._raf=0;this.render();});}
+ setZoom(z){this.zoom=Math.max(5,Math.min(18,z));this.closePopup();this.render();}
+ setRoute(route){this.route=route||[];if(this.route.length)this.fitRoute();else this.render();}
+ setRouteVisible(on){this.routeOn=on;this.renderOverlay();}
+ fitRoute(){if(!this.route.length)return;const lats=this.route.map(p=>p[0]),lons=this.route.map(p=>p[1]);const minLat=Math.min(...lats),maxLat=Math.max(...lats),minLon=Math.min(...lons),maxLon=Math.max(...lons);this.center={lat:(minLat+maxLat)/2,lon:(minLon+maxLon)/2};const w=Math.max(250,this.el.clientWidth),h=Math.max(250,this.el.clientHeight);for(let z=17;z>=6;z--){const a=ll2world(maxLat,minLon,z),b=ll2world(minLat,maxLon,z);if(Math.abs(b.x-a.x)<w*.86&&Math.abs(b.y-a.y)<h*.82){this.zoom=z;break}}this.render();}
+ addServices(items){this.services=items||[];this.renderMarkers();}
+ clearServices(){this.services=[];this.renderMarkers();}
+ setExtraLines(lines){this.extraLines=lines||[];this.renderOverlay();}
+ setSelectedRouteIndex(i){this.selectedRouteIndex=i;this.renderOverlay();}
+ render(){const w=this.el.clientWidth,h=this.el.clientHeight;if(w<20||h<20)return;this.renderTiles(w,h);this.renderOverlay();this.renderMarkers();this.renderScale();}
+ tileUrl(z,x,y){if(this.layer==='topo'&&z<=17)return`https://a.tile.opentopomap.org/${z}/${x}/${y}.png`;return`https://tile.openstreetmap.org/${z}/${x}/${y}.png`;}
+ renderTiles(w,h){const c=ll2world(this.center.lat,this.center.lon,this.zoom),ox=c.x-w/2,oy=c.y-h/2,ts=256,n=Math.pow(2,this.zoom);const minX=Math.floor(ox/ts),maxX=Math.floor((ox+w)/ts),minY=Math.floor(oy/ts),maxY=Math.floor((oy+h)/ts);this.tiles.innerHTML='';let count=0,loaded=0;for(let ty=minY;ty<=maxY;ty++){if(ty<0||ty>=n)continue;for(let tx=minX;tx<=maxX;tx++){const wx=((tx%n)+n)%n,img=document.createElement('img');img.className='bc-tile';img.style.left=(tx*ts-ox)+'px';img.style.top=(ty*ts-oy)+'px';img.alt='';count++;img.onload=()=>{loaded++;if(loaded>0)this.msg.style.display='none'};img.onerror=()=>{if(this.layer==='topo'&&!img.dataset.fallback){img.dataset.fallback='1';img.src=`https://tile.openstreetmap.org/${this.zoom}/${wx}/${ty}.png`;return}img.style.opacity='.15'};img.src=this.tileUrl(this.zoom,wx,ty);this.tiles.appendChild(img);}}this.msg.style.display=count?'block':'none';setTimeout(()=>{if(this.msg&&loaded===0)this.msg.textContent='Sin teselas: la ruta local sigue disponible. Revisa conexión.'},1800);}
+ pixel(lat,lon){const w=this.el.clientWidth,h=this.el.clientHeight,c=ll2world(this.center.lat,this.center.lon,this.zoom),p=ll2world(lat,lon,this.zoom);return{x:w/2+(p.x-c.x),y:h/2+(p.y-c.y)};}
+ renderOverlay(){const w=this.el.clientWidth,h=this.el.clientHeight;this.svg.setAttribute('viewBox',`0 0 ${w} ${h}`);this.svg.innerHTML='';const ns='http://www.w3.org/2000/svg';for(const linePts of this.extraLines){if(!linePts?.length)continue;const pxy=linePts.map(p=>this.pixel(p[0],p[1]));const e=document.createElementNS(ns,'polyline');e.setAttribute('points',pxy.map(p=>`${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' '));e.setAttribute('fill','none');e.setAttribute('stroke','#1267d6');e.setAttribute('stroke-width',this.zoom>=13?'4':'3');e.setAttribute('opacity','.9');e.setAttribute('stroke-linecap','round');e.style.pointerEvents='none';this.svg.appendChild(e)}if(!this.routeOn||!this.route.length)return;const pts=this.route.map(p=>this.pixel(p[0],p[1]));const poly=pts.map(p=>`${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');const halo=document.createElementNS(ns,'polyline');halo.setAttribute('points',poly);halo.setAttribute('fill','none');halo.setAttribute('stroke','#fff4bd');halo.setAttribute('stroke-width',this.zoom>=15?'5':'4');halo.setAttribute('stroke-linecap','round');halo.setAttribute('stroke-linejoin','round');this.svg.appendChild(halo);const line=document.createElementNS(ns,'polyline');line.setAttribute('points',poly);line.setAttribute('fill','none');line.setAttribute('stroke','#0a3f86');line.setAttribute('stroke-width',this.zoom>=15?'2.8':'2.2');line.setAttribute('stroke-linecap','round');line.setAttribute('stroke-linejoin','round');this.svg.appendChild(line);const target=this.zoom>=16?120:this.zoom>=14?80:48,step=Math.max(1,Math.ceil(this.route.length/target)),r=this.zoom>=17?10:this.zoom>=16?8.5:this.zoom>=15?7:this.zoom>=13?5.5:4.5;for(let i=0;i<this.route.length;i+=step)this.addRouteCircle(i,r);if((this.route.length-1)%step!==0)this.addRouteCircle(this.route.length-1,r);if(this.selectedRouteIndex>=0){const p=pts[Math.min(this.selectedRouteIndex,pts.length-1)];const c=document.createElementNS(ns,'circle');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r',r+5);c.setAttribute('fill','#ffc400');c.setAttribute('stroke','#e92b2b');c.setAttribute('stroke-width','3');this.svg.appendChild(c);}}
+ addRouteCircle(i,r){const ns='http://www.w3.org/2000/svg',p=this.pixel(this.route[i][0],this.route[i][1]),c=document.createElementNS(ns,'circle');c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r',r);c.setAttribute('fill','#ffc400');c.setAttribute('stroke','#17345f');c.setAttribute('stroke-width','1.6');c.style.pointerEvents='all';c.style.cursor='pointer';c.addEventListener('pointerdown',e=>e.stopPropagation());c.addEventListener('click',e=>{e.stopPropagation();this.selectRoutePoint(i,p.x,p.y)});this.svg.appendChild(c);}
+ selectRoutePoint(i,x,y){this.selectedRouteIndex=i;this.renderOverlay();this.onRoutePoint?.(i);this.closePopup();const p=this.route[i],samples=buildElevationSamples(1,[this.route]),idx=nearestSample(samples,p[0],p[1]),s=samples[idx];const d=document.createElement('div');d.className='route-popup';d.style.left=x+'px';d.style.top=y+'px';d.innerHTML=`<strong>🟨 ${s?`Km ${s.km.toFixed(1)} · ${Math.round(s.ele)} m`:'Punto de ruta'}</strong><small>${p[0].toFixed(6)}, ${p[1].toFixed(6)}</small><div class="popup-actions"><a href="${mapsUrl(p[0],p[1])}" target="_blank">📍 Maps</a><a href="${earthUrl(p[0],p[1])}" target="_blank">🌍 Earth</a><a href="${osmUrl(p[0],p[1])}" target="_blank">🗺 OSM</a></div>`;this.el.appendChild(d);this.popup=d;}
+ closePopup(){this.popup?.remove();this.popup=null;}
+ renderMarkers(){this.markers.innerHTML='';for(const s of this.services){if(!Number.isFinite(s.lat))continue;const p=this.pixel(s.lat,s.lon),b=document.createElement('button');b.className='bc-marker';b.style.left=p.x+'px';b.style.top=p.y+'px';b.textContent=s.type==='alojamiento'?'🛏':s.type==='comer'?'🍴':'📍';b.title=s.name;b.onclick=e=>{e.stopPropagation();this.closePopup();const d=document.createElement('div');d.className='route-popup';d.style.left=p.x+'px';d.style.top=p.y+'px';d.innerHTML=`<strong>${esc(s.name)}</strong>${s.phone?`<div>📞 ${esc(s.phone)}</div>`:''}<div class="popup-actions">${s.phone?`<a href="tel:${s.phone.replace(/\s/g,'')}">📞 Llamar</a>`:''}<a href="${mapsUrl(s.lat,s.lon)}" target="_blank">📍 Mapa</a></div>`;this.el.appendChild(d);this.popup=d};this.markers.appendChild(b);}}
+ renderScale(){const lat=this.center.lat,metersPerPixel=156543.03392*Math.cos(lat*Math.PI/180)/Math.pow(2,this.zoom),targetPx=90,raw=metersPerPixel*targetPx;const nice=raw>1000?Math.round(raw/1000)+' km':Math.max(10,Math.round(raw/10)*10)+' m';this.scale.textContent=nice;}
+ destroy(){this.el.innerHTML='';}
 }
 
-const roadOverlayCache=new Map();
-function bboxFromSegs(segs,pad=.015){
-  const pts=(segs||[]).flat();if(!pts.length)return null;
-  const lats=pts.map(p=>p[0]),lons=pts.map(p=>p[1]);
-  return{south:Math.min(...lats)-pad,west:Math.min(...lons)-pad,north:Math.max(...lats)+pad,east:Math.max(...lons)+pad}
-}
-async function loadMajorRoadsOverlay(segs,targetMap=mapInstance){
-  if(!targetMap||!segs?.length)return;
-  const b=bboxFromSegs(segs,.02);if(!b)return;
-  const ck=[b.south,b.west,b.north,b.east].map(x=>x.toFixed(2)).join(':');
-  let data=roadOverlayCache.get(ck);
-  if(!data){
-    const bbox=`${b.south},${b.west},${b.north},${b.east}`;
-    const q=`[out:json][timeout:12];way["highway"~"^(motorway|motorway_link)$"](${bbox});out geom;`;
-    try{
-      const r=await fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q),{headers:{Accept:'application/json'}});
-      if(!r.ok)return;const j=await r.json();data=(j.elements||[]).filter(e=>Array.isArray(e.geometry)).map(e=>e.geometry.map(p=>[p.lat,p.lon]));roadOverlayCache.set(ck,data)
-    }catch{return}
-  }
-  if(!data?.length||mapInstance!==targetMap)return;
-  const g=L.layerGroup();
-  data.forEach(line=>L.polyline(line,{color:'#1267d6',weight:4.2,opacity:.9,lineCap:'round',interactive:false}).addTo(g));
-  g.addTo(targetMap);mapLayers.majorRoads=g;
-}
+function localRoute(n){return (typeof LOCAL_VERIFIED_STAGE_ROUTES!=='undefined'&&LOCAL_VERIFIED_STAGE_ROUTES[n])?LOCAL_VERIFIED_STAGE_ROUTES[n].map(p=>[+p[0],+p[1]]):[];}
+function buildStageMap(id,n,services=false){const route=localRoute(n),m=new BCMap(id,{lat:43.08,lon:-1.27,zoom:11,layer:'topo'});m.setRoute(route);m.setRouteVisible(routeVisible);if(services)m.addServices((LOCAL_SERVICES[n]||[]).filter(x=>Number.isFinite(x.lat)));loadMotorways(m,route);return m;}
+async function loadMotorways(map,route){if(!map||!route?.length)return;const lats=route.map(p=>p[0]),lons=route.map(p=>p[1]),pad=.025,s=Math.min(...lats)-pad,w=Math.min(...lons)-pad,n=Math.max(...lats)+pad,e=Math.max(...lons)+pad;const q=`[out:json][timeout:7];way[\"highway\"~\"^(motorway|motorway_link)$\"](${s},${w},${n},${e});out geom;`;const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),6000);try{const r=await fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q),{signal:ctrl.signal});if(!r.ok)return;const j=await r.json();const lines=(j.elements||[]).filter(x=>Array.isArray(x.geometry)).map(x=>x.geometry.map(p=>[p.lat,p.lon]));map.setExtraLines(lines)}catch{}finally{clearTimeout(t)}}
+function cleanupMaps(){mainMap?.destroy?.();mainMap=null;focusMap?.destroy?.();focusMap=null;if(!focusOverlay.hidden)closeFocusMap();}
+function toggleRoute(btn){routeVisible=!routeVisible;localStorage.setItem('bc-route',routeVisible?'1':'0');mainMap?.setRouteVisible(routeVisible);focusMap?.setRouteVisible(routeVisible);if(btn){btn.classList.toggle('active',routeVisible);btn.textContent=`🟨 ${btn.classList.contains('map-float')?'RUTA':'Ruta'} ${routeVisible?'ON':'OFF'}`;}toast(routeVisible?'Ruta visible':'Ruta oculta');}
+function showMapServices(n,map){const items=(LOCAL_SERVICES[n]||[]).filter(x=>Number.isFinite(x.lat)&&['alojamiento','comer'].includes(x.type));if(map.services.length){map.clearServices();toast('Servicios ocultos')}else{map.addServices(items);toast('Alojamientos y comida visibles')}}
+function locate(map){if(!navigator.geolocation){toast('GPS no disponible');return}toast('Buscando tu ubicación…');navigator.geolocation.getCurrentPosition(p=>{const {latitude,longitude,accuracy}=p.coords;map.center={lat:latitude,lon:longitude};map.zoom=15;map.render();const s={type:'gps',name:`Tu posición · ±${Math.round(accuracy)} m`,lat:latitude,lon:longitude};map.addServices([...map.services,s]);toast(`GPS ±${Math.round(accuracy)} m`)},()=>toast('No se pudo obtener ubicación. Revisa permisos.'),{enableHighAccuracy:true,timeout:12000,maximumAge:10000});}
 
-async function makeMap(n,id,fullRoute=false,withPois=false){
-  const buildId=++mapBuildSeq;
-  if(mapInstance){try{mapInstance.remove()}catch{}mapInstance=null}
-  elevationMarker=null;currentElevationSamples=[];elevationSelector=null;currentStageRouteSegs=[];
-  const el=document.getElementById(id);
-  if(!el||typeof L==='undefined'){if(el)el.innerHTML='<div class="empty">El mapa necesita conexión la primera vez.</div>';return}
-  el.innerHTML='';
-  const thisMap=L.map(id,{zoomControl:true,preferCanvas:true});
-  mapInstance=thisMap;mapLayers=baseLayers(thisMap);
+function havKm(a,b){const R=6371,r=Math.PI/180,dlat=(b[0]-a[0])*r,dlon=(b[1]-a[1])*r,la1=a[0]*r,la2=b[0]*r,h=Math.sin(dlat/2)**2+Math.cos(la1)*Math.cos(la2)*Math.sin(dlon/2)**2;return 2*R*Math.asin(Math.sqrt(h));}
+function buildElevationSamples(n,segs){if(n!==1||!segs?.length)return[];const route=segs.flat();if(route.length<2)return[];const cum=[0];for(let i=1;i<route.length;i++)cum[i]=cum[i-1]+havKm(route[i-1],route[i]);const anchors=STAGE1_ELEVATION_ANCHORS.map(a=>{let bi=0,bd=1e9;for(let i=0;i<route.length;i++){const d=(route[i][0]-a[0])**2+(route[i][1]-a[1])**2;if(d<bd){bd=d;bi=i}}return{idx:bi,km:cum[bi],ele:a[2]}}).sort((a,b)=>a.idx-b.idx);const clean=[];for(const a of anchors){if(!clean.length||a.idx>clean.at(-1).idx)clean.push(a)}if(clean.length<2)return[];const elev=km=>{if(km<=clean[0].km)return clean[0].ele;if(km>=clean.at(-1).km)return clean.at(-1).ele;let j=0;while(j<clean.length-2&&clean[j+1].km<km)j++;const a=clean[j],b=clean[j+1],t=(km-a.km)/Math.max(.00001,b.km-a.km);return a.ele+(b.ele-a.ele)*t};const total=cum.at(-1),out=[];let ri=0;for(let k=0;k<180;k++){const km=total*k/179;while(ri<cum.length-2&&cum[ri+1]<km)ri++;const t=(km-cum[ri])/Math.max(.00001,cum[ri+1]-cum[ri]);out.push({km,lat:route[ri][0]+(route[ri+1][0]-route[ri][0])*t,lon:route[ri][1]+(route[ri+1][1]-route[ri][1])*t,ele:elev(km)})}return out;}
+function nearestSample(samples,lat,lon){let b=0,bd=1e9;for(let i=0;i<samples.length;i++){const d=(samples[i].lat-lat)**2+(samples[i].lon-lon)**2;if(d<bd){bd=d;b=i}}return b;}
+function nearestRoute(route,lat,lon){let b=0,bd=1e9;for(let i=0;i<route.length;i++){const d=(route[i][0]-lat)**2+(route[i][1]-lon)**2;if(d<bd){bd=d;b=i}}return b;}
+function setupProfile(id,n,map,readoutId='elevReadout'){const host=document.getElementById(id);if(!host)return;const samples=buildElevationSamples(n,[map.route]);if(!samples.length){host.innerHTML='<div class="empty">Perfil verificado pendiente.</div>';return}const W=600,H=120,pad={l:28,r:8,t:8,b:19},min=Math.min(...samples.map(x=>x.ele)),max=Math.max(...samples.map(x=>x.ele)),x=i=>pad.l+i/(samples.length-1)*(W-pad.l-pad.r),y=e=>pad.t+(max-e)/(max-min||1)*(H-pad.t-pad.b),line=samples.map((p,i)=>`${x(i)},${y(p.ele)}`).join(' '),area=`${pad.l},${H-pad.b} ${line} ${W-pad.r},${H-pad.b}`;host.innerHTML=`<svg class="elevation-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><polygon class="elev-fill" points="${area}"/><polyline class="elev-line" points="${line}"/><line id="elevCursor" class="elev-cursor" x1="${x(0)}" x2="${x(0)}" y1="${pad.t}" y2="${H-pad.b}"/><circle id="elevDot" class="elev-dot" cx="${x(0)}" cy="${y(samples[0].ele)}" r="5"/><text class="elev-label" x="2" y="14">${Math.round(max)} m</text><text class="elev-label" x="2" y="${H-6}">0 km</text><text class="elev-label" x="${W-42}" y="${H-6}">${samples.at(-1).km.toFixed(1)} km</text></svg>`;const svg=host.querySelector('svg'),cur=host.querySelector('#elevCursor'),dot=host.querySelector('#elevDot');const select=(idx,centerMap=false)=>{idx=Math.max(0,Math.min(samples.length-1,idx));const p=samples[idx];cur.setAttribute('x1',x(idx));cur.setAttribute('x2',x(idx));dot.setAttribute('cx',x(idx));dot.setAttribute('cy',y(p.ele));const r=document.getElementById(readoutId);if(r)r.textContent=`Km ${p.km.toFixed(1)} · ${Math.round(p.ele)} m`;const ri=nearestRoute(map.route,p.lat,p.lon);map.setSelectedRouteIndex(ri);if(centerMap){map.center={lat:p.lat,lon:p.lon};map.render();}};map.onRoutePoint=i=>{const p=map.route[i],idx=nearestSample(samples,p[0],p[1]);select(idx,false)};const fromEvent=e=>{const rect=svg.getBoundingClientRect(),px=(e.clientX-rect.left)/rect.width*W,idx=Math.round((px-pad.l)/(W-pad.l-pad.r)*(samples.length-1));select(idx,false)};svg.addEventListener('pointerdown',e=>{svg.setPointerCapture?.(e.pointerId);fromEvent(e)});svg.addEventListener('pointermove',e=>{if(e.buttons||e.pressure>0)fromEvent(e)});select(0,false);}
 
-  // Vista provisional INMEDIATA: evita el panel gris mientras llegan datos remotos.
-  if(n&&STAGE_BBOX[n]){
-    const b=STAGE_BBOX[n],lat=(b.minLat+b.maxLat)/2,lon=(b.minLon+b.maxLon)/2;
-    thisMap.setView([lat,lon],11);
-  }else thisMap.setView([42.75,-4.1],6);
-  setTimeout(()=>{if(mapInstance===thisMap)try{thisMap.invalidateSize()}catch{}},60);
+function openFocusMap(n){focusOverlay.hidden=false;const natural=window.innerWidth>window.innerHeight;focusOverlay.className='focus-overlay'+(natural?'':' force-landscape');focusOverlay.innerHTML=`<div class="focus-top"><strong>BUEN CAMINO · MAPA</strong><button id="focusRoute">🟨 Ruta ${routeVisible?'ON':'OFF'}</button><button id="focusServices">📌 Servicios</button><button id="focusRotate">↻ ${natural?'VERTICAL':'HORIZONTAL'}</button><button id="focusClose">✕ SALIR</button></div><div class="focus-body"><div class="focus-map"><div id="focusMapEl" class="bc-map"></div></div><aside class="focus-profile"><div class="elevation-head"><div><span>DESNIVEL</span><strong id="focusReadout">Toca o desliza</strong></div><small>ruta ↔ perfil</small></div><div id="focusProfile" class="elevation-chart"></div></aside></div>`;document.body.style.overflow='hidden';setTimeout(()=>{focusMap=buildStageMap('focusMapEl',n,false);setupProfile('focusProfile',n,focusMap,'focusReadout')},50);document.getElementById('focusRoute').onclick=()=>toggleRoute(document.getElementById('focusRoute'));document.getElementById('focusServices').onclick=()=>showMapServices(n,focusMap);document.getElementById('focusClose').onclick=closeFocusMap;document.getElementById('focusRotate').onclick=()=>{focusOverlay.classList.toggle('force-landscape');setTimeout(()=>focusMap?.render(),80)};}
+function closeFocusMap(){focusMap?.destroy?.();focusMap=null;focusOverlay.hidden=true;focusOverlay.innerHTML='';document.body.style.overflow='';}
+window.addEventListener('resize',()=>{if(!focusOverlay.hidden){const natural=window.innerWidth>window.innerHeight;if(natural)focusOverlay.classList.remove('force-landscape');setTimeout(()=>focusMap?.render(),100)}});
 
-  // Respaldo local primero: la ruta puede aparecer aunque el CDN esté lento o sin conexión.
-  let segs=n?localStage(n):[];
-  let source=segs.length?'Trazado local verificado (respaldo)':'';
+function mapView(){cleanupMaps();currentView='map';currentStageNo=1;setActive('map');app.innerHTML=`<section class="section"><h2>Mapa del Camino</h2><p class="map-note">La cartografía se incorporará etapa por etapa con control de calidad. La etapa 1 ya dispone de trazado local. No se dibujan etapas inventadas.</p><div class="map-toolbar"><button id="globalBig" class="map-chip primary">⛶ MAPA GRANDE / HORIZONTAL</button></div><div id="globalMap" class="bc-map tall" style="height:60dvh;min-height:430px"></div></section>`;setTimeout(()=>{mainMap=buildStageMap('globalMap',1,false);document.getElementById('globalBig').onclick=()=>openFocusMap(1)},0);}
+function favoritesView(){cleanupMaps();currentView='favorites';setActive('favorites');const list=[...favorites].map(k=>STAGES.find(s=>'stage-'+s.n===k)).filter(Boolean);app.innerHTML=`<section class="section"><h2>Favoritos</h2>${list.length?list.map(stageCard).join(''):'<div class="empty">Todavía no hay etapas favoritas.</div>'}</section>`;bindCommon();}
+function myCamino(){cleanupMaps();currentView='mycamino';setActive('mycamino');app.innerHTML=`<section class="section"><h2>Mi Camino</h2><p class="map-note">Marca etapas realizadas.</p>${STAGES.map(s=>`<article class="stage-card" data-done="${s.n}"><div class="num">${doneStages.has(s.n)?'✓':s.n}</div><div><h3>${esc(s.from)} → ${esc(s.to)}</h3><div class="meta">${s.km.toFixed(1)} km</div></div><b>${doneStages.has(s.n)?'Hecha':''}</b></article>`).join('')}</section>`;document.querySelectorAll('[data-done]').forEach(x=>x.onclick=()=>{const n=+x.dataset.done;doneStages.has(n)?doneStages.delete(n):doneStages.add(n);save();myCamino()});}
 
-  try{
-    await loadOpenPilgrimages();
-    if(buildId!==mapBuildSeq||mapInstance!==thisMap)return;
-    if(fullRoute&&remoteRoute){const r=geoJSONSegments(remoteRoute);if(r.length){segs=r;source='Open Pilgrimages · trazado completo de alta resolución'}}
-    else if(n){const r=stageSegmentsFromRemote(n);if(r.length){segs=r;source='Open Pilgrimages · geometría OSM de alta resolución'}}
-  }catch{}
-  if(buildId!==mapBuildSeq||mapInstance!==thisMap)return;
-
-  currentStageRouteSegs=segs;
-  if(segs.length){
-    const g=routeLayers(thisMap,segs);mapLayers.route=g;
-    const bounds=g.getBounds();if(bounds.isValid())thisMap.fitBounds(bounds,{padding:[18,18],maxZoom:15});
-    if(!routeVisible&&thisMap.hasLayer(g))thisMap.removeLayer(g);
-    const flat=segs.flat();
-    if(n&&flat.length){
-      const st=STAGES.find(x=>x.n===n);
-      L.circleMarker(flat[0],{radius:7,color:'#fff',weight:2,fillColor:'#178a3b',fillOpacity:1}).addTo(thisMap).bindPopup('Inicio: '+st.from);
-      L.circleMarker(flat[flat.length-1],{radius:7,color:'#fff',weight:2,fillColor:'#d93636',fillOpacity:1}).addTo(thisMap).bindPopup('Final: '+st.to);
-    }
-    if(n)loadMajorRoadsOverlay(segs,thisMap);
-  }else if(n){
-    toast('Esta etapa aún no tiene trazado detallado cargado.');
-  }
-  const status=document.getElementById('mapStatus');if(status)status.textContent=source||'Trazado detallado pendiente para esta etapa.';
-  if(n)setupElevationProfile(n,segs);
-  // Los POI no bloquean el mapa: se cargan después de que la cartografía ya sea visible.
-  if(withPois&&n){Promise.resolve().then(()=>showStagePois(n)).catch(()=>{})}
-  setTimeout(()=>{if(mapInstance===thisMap)try{thisMap.invalidateSize();updateRouteStyle(thisMap)}catch{}},120);
-  setTimeout(()=>{if(mapInstance===thisMap)try{thisMap.invalidateSize();updateRouteStyle(thisMap)}catch{}},700);
-}
-
-
-function havKm(a,b){const R=6371,rad=Math.PI/180,dLat=(b[0]-a[0])*rad,dLon=(b[1]-a[1])*rad,la1=a[0]*rad,la2=b[0]*rad;const h=Math.sin(dLat/2)**2+Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
-function buildElevationSamples(n,segs){
-  if(n!==1||!segs?.length)return[];
-  const route=segs.flat().filter(p=>Number.isFinite(p[0])&&Number.isFinite(p[1]));if(route.length<2)return[];
-  const cum=[0];for(let i=1;i<route.length;i++)cum[i]=cum[i-1]+havKm(route[i-1],route[i]);
-  const anchors=STAGE1_ELEVATION_ANCHORS.map(a=>{let best=0,bd=Infinity;for(let i=0;i<route.length;i++){const d=(route[i][0]-a[0])**2+(route[i][1]-a[1])**2;if(d<bd){bd=d;best=i}}return{idx:best,km:cum[best],ele:a[2]}}).sort((a,b)=>a.idx-b.idx);
-  const clean=[];for(const a of anchors){if(!clean.length||a.idx>clean[clean.length-1].idx)clean.push(a);else clean[clean.length-1]=a}
-  if(clean.length<2)return[];
-  const elevAt=(km)=>{let j=0;while(j<clean.length-2&&clean[j+1].km<km)j++;const a=clean[j],b=clean[Math.min(j+1,clean.length-1)];if(km<=clean[0].km)return clean[0].ele;if(km>=clean[clean.length-1].km)return clean[clean.length-1].ele;const t=(km-a.km)/Math.max(.00001,b.km-a.km);return a.ele+(b.ele-a.ele)*t};
-  const total=cum[cum.length-1],count=300,out=[];let ri=0;
-  for(let k=0;k<count;k++){const target=total*k/(count-1);while(ri<cum.length-2&&cum[ri+1]<target)ri++;const d0=cum[ri],d1=cum[ri+1],t=(target-d0)/Math.max(.00001,d1-d0),lat=route[ri][0]+(route[ri+1][0]-route[ri][0])*t,lon=route[ri][1]+(route[ri+1][1]-route[ri][1])*t;out.push({km:target,lat,lon,ele:elevAt(target)})}
-  return out
-}
-function setupElevationProfile(n,segs){const panel=document.getElementById('elevationPanel'),chart=document.getElementById('elevationChart');if(!panel||!chart)return;const samples=buildElevationSamples(n,segs);currentElevationSamples=samples;if(!samples.length){chart.innerHTML='<div class="elevation-loading">Perfil de altitud verificado pendiente para esta etapa.</div>';const src=document.getElementById('elevationSource');if(src)src.textContent='Sin datos de altitud verificados';return}renderElevationProfile(samples);const src=document.getElementById('elevationSource');if(src)src.textContent='Altitud: GPX Fundación ONCE · ruta: geometría detallada'}
-function renderElevationProfile(samples){
- const host=document.getElementById('elevationChart');if(!host||!samples.length)return;
- const W=720,H=210,LFT=52,RGT=18,TOP=12,BOT=34,maxKm=samples[samples.length-1].km;
- const minEle=Math.floor((Math.min(...samples.map(p=>p.ele))-40)/100)*100,maxEle=Math.ceil((Math.max(...samples.map(p=>p.ele))+30)/100)*100;
- const x=p=>LFT+p.km/maxKm*(W-LFT-RGT),y=p=>TOP+(maxEle-p.ele)/(maxEle-minEle)*(H-TOP-BOT);
- const pts=samples.map(p=>`${x(p).toFixed(1)},${y(p).toFixed(1)}`).join(' ');
- let grid='';for(let i=0;i<=3;i++){const yy=TOP+i*(H-TOP-BOT)/3,ev=Math.round(maxEle-i*(maxEle-minEle)/3);grid+=`<line x1="${LFT}" y1="${yy}" x2="${W-RGT}" y2="${yy}" class="elev-grid"/><text x="4" y="${yy+4}" class="elev-axis">${ev} m</text>`}
- for(let i=0;i<=4;i++){const xx=LFT+i*(W-LFT-RGT)/4,km=maxKm*i/4;grid+=`<text x="${xx}" y="${H-7}" text-anchor="middle" class="elev-axis">${km.toFixed(1)} km</text>`}
- host.innerHTML=`<svg id="elevationSvg" class="elevation-svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="Perfil de altitud interactivo"><defs><linearGradient id="elevFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffc400" stop-opacity=".26"/><stop offset="1" stop-color="#ffc400" stop-opacity=".03"/></linearGradient></defs>${grid}<polygon points="${LFT},${H-BOT} ${pts} ${W-RGT},${H-BOT}" class="elev-fill"/><polyline points="${pts}" class="elev-line"/><line id="elevCursorLine" x1="${LFT}" y1="${TOP}" x2="${LFT}" y2="${H-BOT}" class="elev-cursor-line"/><circle id="elevCursor" cx="${LFT}" cy="${y(samples[0])}" r="8" class="elev-cursor"/><rect id="elevHit" x="${LFT}" y="0" width="${W-LFT-RGT}" height="${H}" fill="transparent"/></svg>`;
- const svg=document.getElementById('elevationSvg'),cursor=document.getElementById('elevCursor'),line=document.getElementById('elevCursorLine'),hit=document.getElementById('elevHit'),read=document.getElementById('elevationReadout');
- const selectIndex=(i,pan=false)=>{
-   i=Math.max(0,Math.min(samples.length-1,Number(i)||0));const p=samples[i],cx=x(p),cy=y(p);
-   cursor.setAttribute('cx',cx);cursor.setAttribute('cy',cy);line.setAttribute('x1',cx);line.setAttribute('x2',cx);
-   if(read)read.textContent=`Km ${p.km.toFixed(1)} · ${Math.round(p.ele)} m`;
-   if(mapInstance){
-     if(!elevationMarker)elevationMarker=L.circleMarker([p.lat,p.lon],{radius:8,color:'#062b65',weight:2.5,fillColor:'#ffc400',fillOpacity:1,interactive:false}).addTo(mapInstance);
-     else elevationMarker.setLatLng([p.lat,p.lon]);
-     if(pan&&mapInstance.getZoom()>=14)mapInstance.panTo([p.lat,p.lon],{animate:true,duration:.25});
-   }
- };
- elevationSelector=selectIndex;
- const selectByClientX=(clientX)=>{
-   const r=svg.getBoundingClientRect(),usableLeft=r.left+(LFT/W)*r.width,usableWidth=((W-LFT-RGT)/W)*r.width;
-   const px=Math.max(0,Math.min(1,(clientX-usableLeft)/usableWidth)),targetKm=px*maxKm;
-   let lo=0,hi=samples.length-1;while(lo<hi){const m=(lo+hi)>>1;if(samples[m].km<targetKm)lo=m+1;else hi=m}selectIndex(lo,false)
- };
- hit.addEventListener('pointerdown',e=>{hit.setPointerCapture?.(e.pointerId);selectByClientX(e.clientX)});
- hit.addEventListener('pointermove',e=>{if(e.buttons||e.pointerType==='touch'||e.pointerType==='pen')selectByClientX(e.clientX)});
- hit.addEventListener('click',e=>selectByClientX(e.clientX));
- selectIndex(0,false)
-}}
-function osmRef(osmId){const m=String(osmId||'').match(/^(node|way|relation)\/(\d+)$/i);if(!m)return null;return{type:m[1].toLowerCase(),id:m[2],code:({node:'N',way:'W',relation:'R'})[m[1].toLowerCase()]+m[2]}}
-function contactHtml(c={}){let out='';if(c.phone)out+=`<a class="poi-call" href="tel:${esc(c.phone)}">📞 ${esc(c.phone)}</a>`;if(c.website)out+=`<a class="poi-web" href="${esc(c.website)}" target="_blank" rel="noopener">🌐 Web</a>`;if(c.opening)out+=`<div class="poi-hours">🕒 ${esc(c.opening)}</div>`;return out||'<span class="poi-no-phone">Sin teléfono publicado en la fuente abierta.</span>'}
-function poiPopupHtml(p,name,type,lat,lon){const c=directContact(p),ref=osmRef(p.osmId),km=p.kmFromStart!=null?`<div>Km ${Number(p.kmFromStart).toFixed(1)} del Camino</div>`:'';let contact='';if(c.phone||c.website||c.opening)contact=`<div class="poi-contact">${contactHtml(c)}</div>`;else if(ref)contact=`<div class="poi-contact"><button class="poi-contact-load" data-osm="${esc(p.osmId)}">📞 CARGAR CONTACTO</button><small>Consulta teléfono, web y horario publicados.</small></div>`;else contact='<div class="poi-contact"><span class="poi-no-phone">Sin teléfono publicado.</span></div>';const nav=`<div class="service-nav-actions popup-nav"><a href="${osmUrl(lat,lon)}" target="_blank" rel="noopener">🗺 OSM</a><a href="${mapsUrl(lat,lon)}" target="_blank" rel="noopener">📍 Maps</a><a href="${mapsUrl(lat,lon,'satellite')}" target="_blank" rel="noopener">🛰 Satélite</a><a href="${earthUrl(lat,lon)}" target="_blank" rel="noopener">🌍 Earth</a></div>`;return `<div class="poi-popup"><strong>${esc(name)}</strong><div>${esc(TYPE_LABEL[type]||type)}</div>${km}<small class="poi-coords">${Number(lat).toFixed(5)}, ${Number(lon).toFixed(5)}</small>${contact}${nav}</div>`}
-async function fetchOsmContact(osmId){if(osmContactCache.has(osmId))return osmContactCache.get(osmId);const saved=localStorage.getItem('osm-contact:'+osmId);if(saved){try{const x=JSON.parse(saved);osmContactCache.set(osmId,x);return x}catch{}}const ref=osmRef(osmId);if(!ref)throw new Error('Referencia OSM inválida');let tags={};try{const r=await fetch(`https://api.openstreetmap.org/api/0.6/${ref.type}/${ref.id}.json`,{headers:{Accept:'application/json'}});if(!r.ok)throw new Error('OSM');const j=await r.json();tags=j.elements?.[0]?.tags||{}}catch{
-  const r=await fetch(`https://nominatim.openstreetmap.org/lookup?osm_ids=${ref.code}&format=jsonv2&addressdetails=0&extratags=1&accept-language=es`);if(!r.ok)throw new Error('Nominatim');const j=await r.json();tags=j?.[0]?.extratags||{}
-}
-const c={phone:cleanPhone(tags['contact:phone']||tags.phone||tags['contact:mobile']||tags.mobile),website:String(tags['contact:website']||tags.website||'').trim(),opening:String(tags.opening_hours||'').trim()};osmContactCache.set(osmId,c);try{localStorage.setItem('osm-contact:'+osmId,JSON.stringify(c))}catch{}return c}
-async function loadPoiContact(btn){if(!btn||btn.disabled)return;const osmId=btn.dataset.osm;btn.disabled=true;btn.textContent='Buscando…';try{const c=await fetchOsmContact(osmId);const box=btn.closest('.poi-contact');if(box)box.innerHTML=contactHtml(c)}catch{btn.disabled=false;btn.textContent='📞 REINTENTAR TELÉFONO';toast('No se pudo consultar el teléfono. Comprueba la conexión.')}}
-async function showStagePois(n){if(!remoteWaypoints){try{await loadOpenPilgrimages()}catch{}}if(!remoteWaypoints||!mapInstance){toast('No se pudieron cargar los servicios abiertos.');return}if(mapLayers.pois){mapInstance.removeLayer(mapLayers.pois);mapLayers.pois=null;return}const group=L.layerGroup();let count=0;for(const f of remoteWaypoints.features||[]){if(!waypointStageMatch(f,n))continue;if(f.geometry?.type!=='Point')continue;const [lon,lat]=f.geometry.coordinates||[];if(!Number.isFinite(lat)||!Number.isFinite(lon))continue;const p=f.properties||{},type=p.type||'information',name=p.name?.es||p.name?.en||p.name||TYPE_LABEL[type]||'Servicio';const icon=L.divIcon({className:'poi-div-icon',html:`<span>${TYPE_ICON[type]||'📍'}</span>`,iconSize:[30,30],iconAnchor:[15,15]});L.marker([lat,lon],{icon}).bindPopup(poiPopupHtml(p,name,type,lat,lon),{maxWidth:310}).addTo(group);count++;if(count>=180)break}group.addTo(mapInstance);mapLayers.pois=group;const legend=document.getElementById('poiLegend');if(legend)legend.innerHTML=`<strong>${count} puntos útiles cargados</strong><span>Agua · Salud · Dormir · Comer · Transporte · Suministros · teléfonos cuando están publicados</span>`;toast(count?`${count} servicios cargados`:'No hay servicios cargados para esta etapa')}
-function bindMapToolbar(n){const topo=document.getElementById('topoBtn'),osm=document.getElementById('osmBtn'),route=document.getElementById('routeBtn'),pois=document.getElementById('poisBtn');if(topo)topo.onclick=()=>{if(mapLayers.osm&&mapInstance.hasLayer(mapLayers.osm))mapInstance.removeLayer(mapLayers.osm);if(mapLayers.topo&&!mapInstance.hasLayer(mapLayers.topo))mapLayers.topo.addTo(mapInstance);topo.classList.add('active');osm?.classList.remove('active')};if(osm)osm.onclick=()=>{if(mapLayers.topo&&mapInstance.hasLayer(mapLayers.topo))mapInstance.removeLayer(mapLayers.topo);if(mapLayers.osm&&!mapInstance.hasLayer(mapLayers.osm))mapLayers.osm.addTo(mapInstance);osm.classList.add('active');topo?.classList.remove('active')};if(route)route.onclick=()=>{routeVisible=!routeVisible;localStorage.setItem('camino-route-visible',routeVisible?'1':'0');if(mapLayers.route){if(routeVisible&&!mapInstance.hasLayer(mapLayers.route))mapLayers.route.addTo(mapInstance);if(!routeVisible&&mapInstance.hasLayer(mapLayers.route))mapInstance.removeLayer(mapLayers.route)}route.classList.toggle('active',routeVisible);route.textContent='🟨 RUTA '+(routeVisible?'ON':'OFF');toast(routeVisible?'Ruta visible':'Ruta oculta · mapa limpio')};if(pois)pois.onclick=()=>{if(!n){toast('Abre una etapa para ver servicios asociados.');return}showStagePois(n);pois.classList.toggle('active')}}
-
-function currentStage(){const m=String(currentView).match(/^detail-(\d+)/);return m?STAGES.find(s=>s.n===Number(m[1])):null}
-function reliefAdvice(s){if(!s)return 'Antes de salir, revisa distancia, desnivel y meteorología. En montaña, guarda margen de tiempo y evita atajos.';const ratio=s.gain/Math.max(s.km,1);if(s.gain>=900||ratio>=40)return `Etapa exigente: ${s.km.toFixed(1)} km y +${s.gain} m. Empieza conservador, usa pasos cortos en subida, extrema cuidado en descensos y no recortes por senderos no señalizados.`;if(s.gain>=500||ratio>=25)return `Etapa de relieve medio: ${s.km.toFixed(1)} km y +${s.gain} m. Reparte el esfuerzo, hidrátate con regularidad y reserva energía para el final.`;return `Etapa de relieve moderado: ${s.km.toFixed(1)} km y +${s.gain} m. Mantén ritmo cómodo y presta atención a firmes irregulares y cruces.`}
-function doubtsMarkup(){const s=currentStage();return `
-${s?`<div class="doubt-stage"><span>ETAPA ${s.n}</span><strong>${esc(s.from)} → ${esc(s.to)}</strong><p>${esc(reliefAdvice(s))}</p></div>`:''}
-<details open><summary>⛰ Relieve y dificultad</summary><div class="doubt-copy"><p>Consulta el mapa topográfico, el desnivel y el tiempo antes de salir. En subidas, ritmo corto y constante; en bajadas, pasos controlados. Los bastones pueden ayudar si ya estás acostumbrado a usarlos.</p><p><strong>Alta montaña:</strong> con niebla, tormenta, hielo, viento fuerte o mala visibilidad, prioriza la ruta segura y las indicaciones oficiales.</p></div></details>
-<details><summary>🥾 Calzado</summary><div class="doubt-copy"><p>Usa calzado cómodo, con buen agarre y ya adaptado a tu pie. No estrenes botas o zapatillas el primer día del Camino. Elige la protección y sujeción según terreno, estación y experiencia.</p><p>Lleva calcetines de recambio y cambia los húmedos cuanto antes.</p></div></details>
-<details><summary>🎒 Peso de la mochila</summary><div class="doubt-copy"><p>Como referencia práctica, intenta no superar el <strong>10 % de tu peso corporal</strong> y evita cargar “por si acaso”. Spain.info recomienda además procurar no pasar de unos 7 kg cuando sea posible.</p><p>Coloca lo pesado cerca de la espalda y ajusta cinturón y pecho para repartir la carga.</p></div></details>
-<details><summary>✅ Lo que llevar siempre</summary><div class="doubt-copy doubt-list"><span>💧 Agua / cantimplora</span><span>🌧 Chubasquero o capa</span><span>☀️ Protector solar + gorra</span><span>🩹 Botiquín pequeño</span><span>📱 Móvil + cargador / powerbank</span><span>🪪 DNI/pasaporte + tarjeta sanitaria</span><span>🟨 Credencial del peregrino</span><span>🧦 Calcetines secos de recambio</span><span>🔦 Luz pequeña</span><span>💳 Tarjeta + algo de efectivo</span></div></details>
-<details><summary>🦶 Pies y rozaduras</summary><div class="doubt-copy"><p>Para pronto si notas un punto de roce; secar el pie y ajustar calcetín/calzado suele evitar que empeore. Si aparece una lesión importante, dolor intenso, infección o no puedes apoyar bien, busca atención sanitaria.</p></div></details>
-<details><summary>🌦 Tiempo, agua y comida</summary><div class="doubt-copy"><p>Revisa la previsión antes de salir y adapta la etapa. Lleva agua suficiente entre puntos de abastecimiento y algo de comida fácil de transportar. Con calor, lluvia o frío, reduce el ritmo y evita apurar la jornada.</p></div></details>
-<details><summary>🧭 Si dudas del camino</summary><div class="doubt-copy"><p>Detente y vuelve al último mojón o señal clara. No tomes atajos campo a través. Usa <strong>RUTA</strong> y <strong>GPS</strong> como apoyo, pero da prioridad a la señalización oficial y a las indicaciones locales.</p></div></details>
-<div class="doubt-firstaid"><div><strong>🩹 Primeros auxilios</strong><span>Acceso a la guía oficial de Cruz Roja.</span></div><a href="https://www.cruzroja.es/guiaprevencion/primeros-auxilios.html" target="_blank" rel="noopener">ABRIR GUÍA</a></div><div class="doubt-emergency"><div><strong>⚠ ¿Es una emergencia?</strong><span>Accidente, peligro inmediato o persona desaparecida.</span></div><a href="tel:112">LLAMAR 112</a></div>
-<p class="doubt-source">Consejos basados en recomendaciones oficiales del Camino de Santiago en Galicia y Spain.info. La ayuda de la app no sustituye indicaciones sanitarias, meteorológicas ni de emergencias.</p>`}
-function openDoubts(){const b=document.getElementById('doubtsBackdrop');const body=document.getElementById('doubtsBody');if(!b||!body)return;body.innerHTML=doubtsMarkup();b.hidden=false;requestAnimationFrame(()=>b.classList.add('open'));document.body.classList.add('modal-open')}
-function closeDoubts(){const b=document.getElementById('doubtsBackdrop');if(!b)return;b.classList.remove('open');document.body.classList.remove('modal-open');setTimeout(()=>{b.hidden=true},180)}
-
-function openStageBigMap(n){
-  detail(n,'mapa');
-  const tryOpen=(attempt=0)=>{
-    const el=document.getElementById('stageMapTall');
-    if(el&&mapInstance){enterMapFullscreen(true);return}
-    if(attempt<10)setTimeout(()=>tryOpen(attempt+1),180);
-  };
-  setTimeout(()=>tryOpen(0),260);
-}
-function isViewportLandscape(){return window.innerWidth>window.innerHeight}
-function setLandscapeDirection(dir='right'){
-  document.body.classList.toggle('map-landscape-left',dir==='left');
-  document.body.classList.toggle('map-landscape-right',dir!=='left');
-}
-function updateRotateButton(){
-  const b=document.getElementById('rotateMapBtn');
-  if(!b)return;
-  const manual=document.body.classList.contains('map-manual-landscape');
-  b.textContent=manual?'↺ VERTICAL':'↻ HORIZONTAL';
-  b.classList.toggle('active',manual);
-}
-function applyManualLandscape(force,dir='right',auto=false){
-  const should=typeof force==='boolean'?force:!document.body.classList.contains('map-manual-landscape');
-  if(should)setLandscapeDirection(dir);
-  document.body.classList.toggle('map-manual-landscape',should);
-  document.body.classList.toggle('map-auto-landscape',should&&auto);
-  if(!should)document.body.classList.remove('map-landscape-left','map-landscape-right','map-auto-landscape');
-  updateRotateButton();
-  setTimeout(()=>{try{mapInstance?.invalidateSize();updateRouteStyle(mapInstance)}catch{}},80);
-  setTimeout(()=>{try{mapInstance?.invalidateSize();updateRouteStyle(mapInstance)}catch{}},360);
-}
-function toggleManualLandscape(){
-  if(!mapFocusActive){enterMapFullscreen(true).then(()=>{if(!isViewportLandscape()&&!document.body.classList.contains('map-manual-landscape'))applyManualLandscape(true,'right',false)});return}
-  if(isViewportLandscape()&&!document.body.classList.contains('map-manual-landscape')){toast('El teléfono ya está en horizontal.');return}
-  const currentLeft=document.body.classList.contains('map-landscape-left');
-  if(document.body.classList.contains('map-manual-landscape'))applyManualLandscape(false);
-  else applyManualLandscape(true,currentLeft?'right':'right',false);
-}
-async function enterMapFullscreen(preferLandscape=false){
-  const workspace=document.getElementById('mapWorkspace');
-  const ws=workspace||document.querySelector('.map-shell');if(!ws)return;
-  if(mapFocusActive){if(!preferLandscape){await exitMapFocus();return}}
-  mapFocusActive=true;
-  document.body.classList.add('map-focus');
-  document.body.classList.toggle('map-global-focus',!workspace);
-  const b=document.getElementById('fullscreenMapBtn');if(b)b.textContent='✕ SALIR';
-  try{if(!document.fullscreenElement&&ws.requestFullscreen)await ws.requestFullscreen()}catch{}
-  if(preferLandscape){try{if(screen.orientation?.lock)await screen.orientation.lock('landscape')}catch{}}
-  // Fallback propio: si Android no cambia la geometría, rotamos el mapa nosotros.
-  setTimeout(()=>{if(preferLandscape&&!isViewportLandscape())applyManualLandscape(true,'right',true);updateRotateButton();try{mapInstance?.invalidateSize();updateRouteStyle(mapInstance)}catch{}},260);
-  toast(preferLandscape?'Mapa grande · gira el teléfono; si Android no gira, BUEN CAMINO lo hace':'Mapa grande');
-  setTimeout(()=>{mapInstance?.invalidateSize();updateRouteStyle(mapInstance)},560)
-}
-async function exitMapFocus(){
-  mapFocusActive=false;
-  document.body.classList.remove('map-focus','map-manual-landscape','map-auto-landscape','map-global-focus','map-landscape-left','map-landscape-right');
-  const b=document.getElementById('fullscreenMapBtn');if(b)b.textContent='⛶ MAPA GRANDE';updateRotateButton();
-  try{if(document.fullscreenElement&&document.exitFullscreen)await document.exitFullscreen()}catch{}
-  try{screen.orientation?.unlock?.()}catch{}
-  setTimeout(()=>{mapInstance?.invalidateSize();updateRouteStyle(mapInstance)},180)
-}
-function autoFocusLandscape(){
-  const hasWorkspace=!!document.getElementById('mapWorkspace');
-  const hasGlobalMap=currentView==='map'&&!!document.querySelector('.map-shell.map-mode');
-  if(!hasWorkspace&&!hasGlobalMap)return;
-  const landscape=isViewportLandscape();
-  if(landscape&&!mapFocusActive){
-    mapFocusActive=true;document.body.classList.add('map-focus');document.body.classList.toggle('map-global-focus',!hasWorkspace);
-    const b=document.getElementById('fullscreenMapBtn');if(b)b.textContent='✕ SALIR';
-    if(document.body.classList.contains('map-manual-landscape'))applyManualLandscape(false);
-    updateRotateButton();setTimeout(()=>{mapInstance?.invalidateSize();updateRouteStyle(mapInstance)},220)
-  }
-  if(landscape&&document.body.classList.contains('map-manual-landscape'))applyManualLandscape(false);
-}
-function handlePhysicalOrientation(e){
-  if(!mapFocusActive||isViewportLandscape())return;
-  const g=Number(e.gamma);if(!Number.isFinite(g))return;
-  const now=Date.now();if(now-physicalOrientationLast<260)return;
-  if(Math.abs(g)>52&&Math.abs(g)<135){
-    physicalOrientationLast=now;
-    // gamma positiva/negativa identifica hacia qué lado se ha tumbado el teléfono.
-    const dir=g>0?'right':'left';
-    const needs=!document.body.classList.contains('map-manual-landscape') ||
-      (dir==='left'&&!document.body.classList.contains('map-landscape-left')) ||
-      (dir==='right'&&!document.body.classList.contains('map-landscape-right'));
-    if(needs)applyManualLandscape(true,dir,true);
-  }else if(Math.abs(g)<28&&document.body.classList.contains('map-auto-landscape')){
-    physicalOrientationLast=now;applyManualLandscape(false);
-  }
-}
-function locateUser(){if(!navigator.geolocation){toast('Este dispositivo no ofrece geolocalización.');return}toast('Solicitando GPS de alta precisión…');navigator.geolocation.getCurrentPosition(p=>{const {latitude,longitude,accuracy}=p.coords;if(mapInstance){const me=L.circleMarker([latitude,longitude],{radius:8,color:'#fff',weight:3,fillColor:'#0d6efd',fillOpacity:1}).addTo(mapInstance).bindPopup(`Estás aquí · precisión ±${Math.round(accuracy)} m`).openPopup();L.circle([latitude,longitude],{radius:accuracy,color:'#0d6efd',weight:1,fillOpacity:.06}).addTo(mapInstance);mapInstance.setView([latitude,longitude],15)}else{mapView();setTimeout(()=>locateUser(),650)}toast(`GPS localizado · ±${Math.round(accuracy)} m`)},()=>toast('No se pudo obtener la ubicación. Revisa permisos de ubicación.'),{enableHighAccuracy:true,timeout:12000,maximumAge:15000})}
-function serviceSearch(type){if(type==='emergencia'){location.href='tel:112';return}if(type==='primeros_auxilios'){window.open('https://www.cruzroja.es/guiaprevencion/primeros-auxilios.html','_blank','noopener');return}if(type==='meteorología'){const s=currentStage();if(s)openAemetForStage(s.n);else window.open('https://www.aemet.es/es/eltiempo/prediccion/municipios','_blank','noopener');return}const s=currentStage();if(s){const map={alojamiento:'alojamiento',restaurante:'restaurante',fuente:'fuente',farmacia:'farmacia','centro de salud':'salud',taxi:'taxi',transporte:'transporte',supermercado:'supermercado','cajero automático':'cajero',lavandería:'lavanderia','aseos públicos':'wc','taller bicicletas':'bicicleta','credencial peregrino':'sellos','policía guardia civil':'policia',ayuntamiento:'ayuntamiento'};detail(s.n,'servicios');setTimeout(()=>{const k=map[type];if(k){const b=document.querySelector(`[data-stage-service="${k}"]`);b?.click()}},80);return}const q=encodeURIComponent(type+' Camino de Santiago');window.open('https://www.openstreetmap.org/search?query='+q,'_blank','noopener')}
-function bindFav(){document.querySelectorAll('[data-fav]').forEach(b=>b.onclick=e=>{e.stopPropagation();const id=b.dataset.fav;favorites.has(id)?favorites.delete(id):favorites.add(id);save();b.classList.toggle('on',favorites.has(id));toast(favorites.has(id)?'Añadido a favoritos':'Eliminado de favoritos')})}
-function bindStageCards(){document.querySelectorAll('[data-stage]').forEach(c=>{c.onclick=()=>detail(Number(c.dataset.stage));c.onkeydown=e=>{if(e.key==='Enter')c.click()}})}
-function bindCommon(){bindStageCards();document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>navigate(b.dataset.nav));document.querySelectorAll('[data-service]').forEach(b=>b.onclick=()=>serviceSearch(b.dataset.service));const w=document.getElementById('whereBtn');if(w)w.onclick=locateUser}
-function navigate(v){if(v==='home')home();else if(v==='stages')stages();else if(v==='map')mapView();else if(v==='favorites')favoritesView();else if(v==='mycamino')myCamino()}
-
-document.querySelectorAll('.bottom-nav [data-nav]').forEach(b=>b.onclick=()=>navigate(b.dataset.nav));document.querySelector('.brand').onclick=home;
-document.getElementById('doubtsBtn').onclick=openDoubts;document.getElementById('closeDoubts').onclick=closeDoubts;document.getElementById('doubtsBackdrop').addEventListener('click',e=>{if(e.target.id==='doubtsBackdrop')closeDoubts()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDoubts()});document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&mapFocusActive){mapFocusActive=false;document.body.classList.remove('map-focus','map-manual-landscape','map-auto-landscape','map-global-focus','map-landscape-left','map-landscape-right');const b=document.getElementById('fullscreenMapBtn');if(b)b.textContent='⛶ MAPA GRANDE'}setTimeout(()=>mapInstance?.invalidateSize(),180)});
-window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;const b=document.getElementById('installBtn');b.hidden=false;b.onclick=async()=>{deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;b.hidden=true}});
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-const refreshMapSize=()=>setTimeout(()=>{try{mapInstance?.invalidateSize()}catch{}},180);
-window.addEventListener('resize',()=>{refreshMapSize();setTimeout(autoFocusLandscape,120)});
-window.addEventListener('orientationchange',()=>{refreshMapSize();setTimeout(autoFocusLandscape,220)});
-try{screen.orientation?.addEventListener?.('change',()=>{refreshMapSize();setTimeout(autoFocusLandscape,180)})}catch{}
-window.addEventListener('deviceorientation',handlePhysicalOrientation,{passive:true});
-document.addEventListener('click',e=>{const b=e.target.closest?.('.poi-contact-load');if(b){e.preventDefault();loadPoiContact(b)}});
+function openDoubts(){document.getElementById('doubtsBody').innerHTML=`<div class="doubt-card"><strong>⛰ Relieve</strong><p>Revisa curvas de nivel, desnivel y meteorología. En niebla, tormenta, hielo o nieve, sigue avisos oficiales y evita atajos.</p></div><div class="doubt-card"><strong>🥾 Calzado</strong><p>Calzado cómodo, ya usado, adecuado al terreno. Evita estrenar botas el primer día.</p></div><div class="doubt-card"><strong>🎒 Mochila</strong><p>Ligera y bien ajustada. Como orientación, intenta que el peso total no supere aproximadamente el 10 % de tu peso corporal si tu situación física lo permite.</p></div><div class="doubt-card"><strong>🧰 Llevar siempre</strong><p>Agua, algo de comida, capa de lluvia, abrigo ligero, botiquín básico, documentación/credencial, móvil cargado y batería externa.</p></div><div class="doubt-card"><strong>🦶 Pies</strong><p>Calcetines adecuados, pies secos, tratamiento temprano de rozaduras. Si hay dolor importante o lesión, busca atención sanitaria.</p></div><div class="danger-links"><a class="aid" href="https://www.cruzroja.es/guiaprevencion/primeros-auxilios.html" target="_blank">🩹 PRIMEROS AUXILIOS</a><a class="emg" href="tel:112">☎ 112</a></div>`;document.getElementById('doubtsBackdrop').hidden=false;}
+function bindStageCards(){document.querySelectorAll('[data-stage]').forEach(x=>x.onclick=()=>detail(+x.dataset.stage));}
+function bindCommon(){bindStageCards();document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>navigate(b.dataset.nav));document.querySelectorAll('[data-quick]').forEach(b=>b.onclick=()=>{detail(1,'servicios');setTimeout(()=>document.querySelector(`[data-service="${b.dataset.quick}"]`)?.click(),40)});}
+function navigate(v){if(v==='home')home();else if(v==='stages')stages();else if(v==='map')mapView();else if(v==='favorites')favoritesView();else if(v==='mycamino')myCamino();}
+document.querySelectorAll('.bottom-nav [data-nav]').forEach(b=>b.onclick=()=>navigate(b.dataset.nav));document.getElementById('brandBtn').onclick=home;document.getElementById('doubtsBtn').onclick=openDoubts;document.getElementById('closeDoubts').onclick=()=>document.getElementById('doubtsBackdrop').hidden=true;document.getElementById('doubtsBackdrop').onclick=e=>{if(e.target.id==='doubtsBackdrop')e.currentTarget.hidden=true};
+if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 home();

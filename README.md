@@ -1,37 +1,18 @@
-# BUEN CAMINO — V4.9.1 PRO
+# BUEN CAMINO — V5.0 ESTABLE
 
-Actualización centrada en **servicios útiles, cartografía y lectura del relieve**, manteniendo el proyecto sin APIs de pago.
-## Corrección V4.9.1
+Versión de estabilización de la guía Android del Camino Francés.
 
-- El mapa ya fija una **vista provisional inmediata** antes de esperar a los datos remotos, evitando la pantalla gris.
-- OpenStreetMap queda como **respaldo automático bajo OpenTopoMap**: si las teselas topográficas fallan, siempre queda cartografía visible.
-- Las descargas JSON tienen tiempo máximo y se usa el **trazado local verificado** como respaldo.
-- Se evita que dos inicializaciones de mapa se pisen entre sí al cambiar rápidamente de Resumen a Mapa grande.
-- Los servicios se cargan después y **ya no bloquean el dibujo del mapa**.
+## Qué cambia
 
+- Se elimina la dependencia de Leaflet/unpkg: el mapa usa un motor cartográfico propio en JavaScript.
+- El trazado de la etapa 1 está dentro de la aplicación y se dibuja aunque fallen datos externos.
+- OpenTopoMap se usa como fondo topográfico; si una tesela falla, intenta OpenStreetMap como respaldo.
+- Modo MAPA GRANDE/HORIZONTAL independiente del bloqueo de giro de Android: la vista se rota internamente cuando hace falta.
+- Perfil de desnivel compacto y sincronizado en ambos sentidos con los puntos amarillos de la ruta.
+- Los puntos amarillos aumentan de tamaño al hacer zoom.
+- Servicios y Alojamientos de la etapa 1 disponen de una base local verificada con teléfonos, webs, direcciones y enlaces de mapa; no dependen de Overpass para mostrar los datos esenciales.
+- Se mantienen DUDAS, Primeros Auxilios, 112, AEMET, GPS, favoritos y Mi Camino.
 
-## Cambios principales
+## Principio de datos
 
-- **Puntos amarillos de la ruta interactivos**: al tocarlos, BUEN CAMINO selecciona el punto equivalente en el perfil de desnivel y muestra km, altitud y coordenadas cuando el perfil está disponible.
-- Cada punto de ruta ofrece accesos externos gratuitos a **Google Maps satélite**, **Google Earth web** y **OpenStreetMap**. No se usa Google Maps Platform ni Places API.
-- Los puntos amarillos son más grandes a niveles altos de zoom para poder seguir la ruta sin tapar el mapa.
-- **Autopistas (OSM `motorway`) resaltadas en azul** mediante una superposición obtenida de OpenStreetMap/Overpass cuando hay datos disponibles.
-- **Perfil de desnivel más pequeño** para dejar más superficie útil al mapa, tanto en vertical como en horizontal.
-- **Servicios de etapa renovados**: Dormir, Comer, Agua, Farmacia, Salud, Taxi, Bus/Tren, Tienda, Cajero, Lavandería, WC, Bicicleta, Sellos, Policía y Ayuntamiento.
-- Las fichas de servicios pueden mostrar **teléfono, web, horario, ubicación, km del Camino y coordenadas** cuando las fuentes abiertas los publican.
-- Botones directos a **OpenStreetMap, Google Maps, vista satélite y Google Earth** para cada lugar.
-- La pestaña **Alojamientos** carga alojamientos reales de fuentes abiertas en lugar de fichas de ejemplo cuando hay datos para la etapa.
-- **Meteorología AEMET**: en la Etapa 1 abre directamente la predicción oficial de Orreaga/Roncesvalles; el resto de etapas enlaza a la predicción municipal de AEMET mientras se incorporan los enlaces municipales específicos.
-- Se mantienen: mapa topográfico con curvas de nivel, RUTA ON/OFF, GPS, mapa grande/horizontal, DUDAS, Primeros Auxilios y 112.
-
-## Fuentes gratuitas
-
-- Open Pilgrimages / OpenStreetMap (ODbL) — ruta y puntos útiles.
-- OpenTopoMap — cartografía topográfica y curvas de nivel.
-- Overpass API — consultas OSM bajo demanda para servicios y autopistas.
-- AEMET — meteorología oficial mediante enlace público.
-- Google Maps URLs / Google Earth web — solo enlaces externos gratuitos; no se utiliza ninguna API de pago.
-
-## Importante
-
-La información de teléfonos, horarios y establecimientos puede cambiar. BUEN CAMINO muestra únicamente datos publicados en las fuentes abiertas y no inventa contactos, precios ni disponibilidad. El mapa es una ayuda al peregrino y no sustituye la señalización oficial, avisos meteorológicos ni indicaciones de emergencias.
+BUEN CAMINO no inventa establecimientos, teléfonos ni rutas. Las demás etapas se irán incorporando y verificando progresivamente.

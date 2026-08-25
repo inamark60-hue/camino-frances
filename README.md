@@ -20,3 +20,18 @@ PWA gratuita optimizada para Android.
 
 ## Importante
 Esta V4 mejora mucho la cartografía, pero no debe presentarse como navegación de seguridad o giro a giro. El Camino real, señalización, cierres temporales y avisos oficiales tienen prioridad.
+
+
+## V4.2 PRO — trazado legible
+
+- Sustituye la línea gruesa por una guía fina semitransparente.
+- Superpone puntos amarillos del Camino para seguir la ruta sin ocultar senderos, cruces ni curvas de nivel.
+- Mantiene OpenTopoMap como base topográfica por defecto.
+- Renueva la caché PWA a v41.
+- La cartografía sigue siendo una ayuda y no sustituye la señalización física ni avisos oficiales.
+
+
+## V4.2 — control de ruta
+- Botón `Ruta ON/OFF` en los mapas.
+- Oculta o muestra la guía fina y los puntos amarillos sin quitar la cartografía topográfica.
+- La preferencia queda guardada en el teléfono.

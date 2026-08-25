@@ -38,3 +38,13 @@ Los datos de alojamientos y servicios de la Etapa 30 son deliberadamente demostr
 3. Incorporar consulta gratuita a OpenStreetMap/Overpass con caché prudente.
 4. Añadir descarga offline de una etapa seleccionada.
 5. Añadir panel de administración gratuito con Supabase, solo si hace falta.
+
+
+## Versión 2 — mapas corregidos
+- El mapa general carga el trazado completo real del Camino Francés desde un GeoJSON abierto.
+- Cada ficha de etapa recorta el trazado entre el inicio y el final de la etapa.
+- El mapa ajusta automáticamente el zoom al recorrido visible.
+- La geolocalización sigue funcionando sobre el mapa.
+- El service worker usa una caché nueva (`camino-frances-v2`) para forzar la actualización de la app instalada.
+
+Fuente de trazado: Open Pilgrimages / OpenStreetMap (ODbL). Para Galicia, la Xunta de Galicia también publica el KML oficial del Camino Francés.

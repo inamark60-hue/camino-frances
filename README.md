@@ -67,3 +67,11 @@ Fuente de trazado: Open Pilgrimages / OpenStreetMap (ODbL). Para Galicia, la Xun
 - El mapa base de OpenStreetMap sigue necesitando conexión para descargar teselas que no estén ya en caché.
 
 **Nota:** el trazado local de V3.1 está simplificado a una selección de puntos del GPX oficial para la visualización cartográfica. No debe usarse como navegación turn-by-turn ni sustituye la señalización física del Camino.
+
+
+## V3.2 — trazado más detallado de la etapa 1
+- Se aumenta notablemente la densidad del trazado local de Saint-Jean-Pied-de-Port → Roncesvalles.
+- Las coordenadas incorporadas proceden del GPX publicado por Fundación ONCE.
+- Se mantiene el funcionamiento local del trazado para evitar CORS y fallos de descarga del GPX.
+- Caché renovada a `camino-frances-v32`.
+- Sigue siendo una referencia cartográfica: no sustituye la señalización física, avisos oficiales ni navegación de seguridad.

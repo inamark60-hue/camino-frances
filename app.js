@@ -1,6 +1,7 @@
 const app=document.getElementById('app');
 const toastEl=document.getElementById('toast');
 let currentView='home',deferredPrompt,mapInstance,mapLayers={};
+let mapBuildSeq=0;
 let mapFocusActive=false,elevationMarker=null,currentElevationSamples=[],elevationSelector=null,currentStageRouteSegs=[];
 let routeDotMarkers=[],routeGuideLines=[],routeHaloLines=[];
 let physicalOrientationLast=0;
@@ -45,7 +46,7 @@ function quickButtons(){return [
 ].map(x=>`<button class="quick" data-service="${x[2]}"><span class="qicon">${x[0]}</span>${x[1]}</button>`).join('')}
 
 function home(){currentView='home';setActive('home');app.innerHTML=`
-<section class="hero"><img class="home-logo" src="buen-camino-logo.png" alt="BUEN CAMINO"><p>33 etapas, mapa topográfico, GPS, servicios y ayuda práctica para el peregrino. Pensada exclusivamente para Android.</p><span class="pill">GRATUITA · ANDROID · V4.9 PRO</span></section>
+<section class="hero"><img class="home-logo" src="buen-camino-logo.png" alt="BUEN CAMINO"><p>33 etapas, mapa topográfico, GPS, servicios y ayuda práctica para el peregrino. Pensada exclusivamente para Android.</p><span class="pill">GRATUITA · ANDROID · V4.9.1 PRO</span></section>
 <section class="pro-banner"><strong>🗺 Cartografía topográfica</strong><span>Curvas de nivel, relieve y trazado GPS cuando está disponible.</span></section>
 <section class="section"><div class="section-head"><h2>Las 33 etapas</h2><button class="link-btn" data-nav="stages">Ver todas</button></div>${STAGES.slice(0,5).map(stageCard).join('')}</section>
 <button class="location-cta" id="whereBtn">📍 ¿DÓNDE ESTOY AHORA?<small>GPS del teléfono · alta precisión si Android la permite</small></button>
@@ -157,7 +158,15 @@ function favoritesView(){currentView='favorites';setActive('favorites');const st
 function myCamino(){currentView='mycamino';setActive('mycamino');const done=[...doneStages].map(n=>STAGES.find(s=>s.n===n)).filter(Boolean);const km=done.reduce((a,s)=>a+s.km,0),pct=Math.round(doneStages.size/STAGES.length*100);app.innerHTML=`<section class="section"><h2>Mi Camino</h2><div class="progress-card"><strong>${doneStages.size} de 33 etapas</strong><div class="progress-track"><div class="progress-bar" style="width:${pct}%"></div></div><div class="meta">${km.toFixed(1)} km registrados de ${kmTotal().toFixed(1)} km</div></div><h2>Marcar etapas realizadas</h2>${STAGES.map(s=>`<div class="my-stage" data-done="${s.n}"><button class="check ${doneStages.has(s.n)?'done':''}">${doneStages.has(s.n)?'✓':''}</button><div><strong>Etapa ${s.n}</strong><div class="meta">${esc(s.from)} → ${esc(s.to)}</div></div></div>`).join('')}</section>`;document.querySelectorAll('[data-done]').forEach(r=>r.onclick=()=>{const n=Number(r.dataset.done);doneStages.has(n)?doneStages.delete(n):doneStages.add(n);save();myCamino()})}
 
 function geoJSONSegments(gj){const out=[];const add=line=>{const seg=(line||[]).map(c=>[Number(c[1]),Number(c[0]),c.length>2?Number(c[2]):null]).filter(c=>Number.isFinite(c[0])&&Number.isFinite(c[1]));if(seg.length>1)out.push(seg)};(gj?.features||[]).forEach(f=>{const g=f?.geometry;if(!g)return;if(g.type==='LineString')add(g.coordinates);else if(g.type==='MultiLineString')(g.coordinates||[]).forEach(add)});return out}
-async function fetchJson(url){const r=await fetch(url,{mode:'cors',cache:'force-cache'});if(!r.ok)throw new Error(String(r.status));return r.json()}
+async function fetchJson(url){
+  const ctrl=new AbortController();
+  const timer=setTimeout(()=>ctrl.abort(),6500);
+  try{
+    const r=await fetch(url,{mode:'cors',cache:'force-cache',signal:ctrl.signal});
+    if(!r.ok)throw new Error(String(r.status));
+    return await r.json();
+  }finally{clearTimeout(timer)}
+}
 async function loadOpenPilgrimages(){const jobs=[];if(!remoteRoute)jobs.push(fetchJson(ROUTE_URL).then(x=>remoteRoute=x));if(!remoteWaypoints)jobs.push(fetchJson(WAYPOINTS_URL).then(x=>remoteWaypoints=x));if(!remoteStages)jobs.push(fetchJson(STAGES_URL).then(x=>remoteStages=x));await Promise.allSettled(jobs)}
 function inBox(lat,lon,b){return lat>=b.minLat&&lat<=b.maxLat&&lon>=b.minLon&&lon<=b.maxLon}
 function stageSegmentsFromRemote(n){if(!remoteRoute)return[];const all=geoJSONSegments(remoteRoute);const b=STAGE_BBOX[n];if(!b)return[];return all.map(seg=>seg.filter(p=>inBox(p[0],p[1],b))).filter(seg=>seg.length>1)}
@@ -224,7 +233,31 @@ function routeLayers(map,segs){
   map.on('zoomend',()=>updateRouteStyle(map));
   return g
 }
-function baseLayers(map){const topo=L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:17,attribution:'Kartendaten © OpenStreetMap-Mitwirkende, SRTM | Kartendarstellung © OpenTopoMap (CC-BY-SA)'});const osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'});topo.addTo(map);L.control.layers({'Topográfico · curvas de nivel':topo,'Calles · OpenStreetMap':osm},null,{position:'topright',collapsed:true}).addTo(map);L.control.scale({imperial:false,position:'bottomleft'}).addTo(map);return{topo,osm}}
+function baseLayers(map){
+  // OpenStreetMap queda por debajo como respaldo invisible: si OpenTopoMap tarda
+  // o falla, el peregrino nunca ve un rectángulo gris.
+  const fallback=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    maxZoom:19,attribution:'© OpenStreetMap contributors'
+  });
+  const topo=L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{
+    maxZoom:17,attribution:'Kartendaten © OpenStreetMap-Mitwirkende, SRTM | Kartendarstellung © OpenTopoMap (CC-BY-SA)'
+  });
+  const topoGroup=L.layerGroup([fallback,topo]).addTo(map);
+  const osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'});
+  let errors=0,notified=false;
+  topo.on('tileerror',()=>{
+    errors++;
+    if(errors>=6&&!notified){
+      notified=true;
+      try{topoGroup.removeLayer(topo)}catch{}
+      toast('Topográfico no respondió; mostramos OpenStreetMap como respaldo.');
+    }
+  });
+  topo.on('load',()=>{errors=0});
+  L.control.layers({'Topográfico · curvas de nivel':topoGroup,'Calles · OpenStreetMap':osm},null,{position:'topright',collapsed:true}).addTo(map);
+  L.control.scale({imperial:false,position:'bottomleft'}).addTo(map);
+  return{topo,topoGroup,fallback,osm}
+}
 
 const roadOverlayCache=new Map();
 function bboxFromSegs(segs,pad=.015){
@@ -232,8 +265,8 @@ function bboxFromSegs(segs,pad=.015){
   const lats=pts.map(p=>p[0]),lons=pts.map(p=>p[1]);
   return{south:Math.min(...lats)-pad,west:Math.min(...lons)-pad,north:Math.max(...lats)+pad,east:Math.max(...lons)+pad}
 }
-async function loadMajorRoadsOverlay(segs){
-  if(!mapInstance||!segs?.length)return;const targetMap=mapInstance;
+async function loadMajorRoadsOverlay(segs,targetMap=mapInstance){
+  if(!targetMap||!segs?.length)return;
   const b=bboxFromSegs(segs,.02);if(!b)return;
   const ck=[b.south,b.west,b.north,b.east].map(x=>x.toFixed(2)).join(':');
   let data=roadOverlayCache.get(ck);
@@ -252,22 +285,55 @@ async function loadMajorRoadsOverlay(segs){
 }
 
 async function makeMap(n,id,fullRoute=false,withPois=false){
- if(mapInstance){try{mapInstance.remove()}catch{}mapInstance=null}
- elevationMarker=null;currentElevationSamples=[];elevationSelector=null;currentStageRouteSegs=[];
- const el=document.getElementById(id);if(!el||typeof L==='undefined'){if(el)el.innerHTML='<div class="empty">El mapa necesita conexión la primera vez.</div>';return}
- el.innerHTML='';mapInstance=L.map(id,{zoomControl:true,preferCanvas:true});mapLayers=baseLayers(mapInstance);
- let segs=[];let source='';
- try{await loadOpenPilgrimages();if(fullRoute&&remoteRoute){segs=geoJSONSegments(remoteRoute);source='Open Pilgrimages · trazado completo de alta resolución'}else if(n){segs=stageSegmentsFromRemote(n);if(segs.length)source='Open Pilgrimages · geometría OSM de alta resolución'}}catch{}
- if(!segs.length&&n){segs=localStage(n);source=segs.length?'Trazado local verificado (respaldo)':''}
- currentStageRouteSegs=segs;
- if(segs.length){
-   const g=routeLayers(mapInstance,segs);mapLayers.route=g;const b=g.getBounds();if(b.isValid())mapInstance.fitBounds(b,{padding:[18,18],maxZoom:15});
-   if(!routeVisible&&mapInstance.hasLayer(g))mapInstance.removeLayer(g);
-   const flat=segs.flat();if(n&&flat.length){L.circleMarker(flat[0],{radius:7,color:'#fff',weight:2,fillColor:'#178a3b',fillOpacity:1}).addTo(mapInstance).bindPopup('Inicio: '+STAGES.find(x=>x.n===n).from);L.circleMarker(flat[flat.length-1],{radius:7,color:'#fff',weight:2,fillColor:'#d93636',fillOpacity:1}).addTo(mapInstance).bindPopup('Final: '+STAGES.find(x=>x.n===n).to)}
-   if(n)loadMajorRoadsOverlay(segs);
- }else{mapInstance.setView([42.9,-4.5],6);toast('Esta etapa aún no tiene trazado detallado cargado.')}
- const status=document.getElementById('mapStatus');if(status)status.textContent=source||'Trazado detallado pendiente para esta etapa.';
- if(n)setupElevationProfile(n,segs);if(withPois&&n)await showStagePois(n);setTimeout(()=>mapInstance&&mapInstance.invalidateSize(),120)
+  const buildId=++mapBuildSeq;
+  if(mapInstance){try{mapInstance.remove()}catch{}mapInstance=null}
+  elevationMarker=null;currentElevationSamples=[];elevationSelector=null;currentStageRouteSegs=[];
+  const el=document.getElementById(id);
+  if(!el||typeof L==='undefined'){if(el)el.innerHTML='<div class="empty">El mapa necesita conexión la primera vez.</div>';return}
+  el.innerHTML='';
+  const thisMap=L.map(id,{zoomControl:true,preferCanvas:true});
+  mapInstance=thisMap;mapLayers=baseLayers(thisMap);
+
+  // Vista provisional INMEDIATA: evita el panel gris mientras llegan datos remotos.
+  if(n&&STAGE_BBOX[n]){
+    const b=STAGE_BBOX[n],lat=(b.minLat+b.maxLat)/2,lon=(b.minLon+b.maxLon)/2;
+    thisMap.setView([lat,lon],11);
+  }else thisMap.setView([42.75,-4.1],6);
+  setTimeout(()=>{if(mapInstance===thisMap)try{thisMap.invalidateSize()}catch{}},60);
+
+  // Respaldo local primero: la ruta puede aparecer aunque el CDN esté lento o sin conexión.
+  let segs=n?localStage(n):[];
+  let source=segs.length?'Trazado local verificado (respaldo)':'';
+
+  try{
+    await loadOpenPilgrimages();
+    if(buildId!==mapBuildSeq||mapInstance!==thisMap)return;
+    if(fullRoute&&remoteRoute){const r=geoJSONSegments(remoteRoute);if(r.length){segs=r;source='Open Pilgrimages · trazado completo de alta resolución'}}
+    else if(n){const r=stageSegmentsFromRemote(n);if(r.length){segs=r;source='Open Pilgrimages · geometría OSM de alta resolución'}}
+  }catch{}
+  if(buildId!==mapBuildSeq||mapInstance!==thisMap)return;
+
+  currentStageRouteSegs=segs;
+  if(segs.length){
+    const g=routeLayers(thisMap,segs);mapLayers.route=g;
+    const bounds=g.getBounds();if(bounds.isValid())thisMap.fitBounds(bounds,{padding:[18,18],maxZoom:15});
+    if(!routeVisible&&thisMap.hasLayer(g))thisMap.removeLayer(g);
+    const flat=segs.flat();
+    if(n&&flat.length){
+      const st=STAGES.find(x=>x.n===n);
+      L.circleMarker(flat[0],{radius:7,color:'#fff',weight:2,fillColor:'#178a3b',fillOpacity:1}).addTo(thisMap).bindPopup('Inicio: '+st.from);
+      L.circleMarker(flat[flat.length-1],{radius:7,color:'#fff',weight:2,fillColor:'#d93636',fillOpacity:1}).addTo(thisMap).bindPopup('Final: '+st.to);
+    }
+    if(n)loadMajorRoadsOverlay(segs,thisMap);
+  }else if(n){
+    toast('Esta etapa aún no tiene trazado detallado cargado.');
+  }
+  const status=document.getElementById('mapStatus');if(status)status.textContent=source||'Trazado detallado pendiente para esta etapa.';
+  if(n)setupElevationProfile(n,segs);
+  // Los POI no bloquean el mapa: se cargan después de que la cartografía ya sea visible.
+  if(withPois&&n){Promise.resolve().then(()=>showStagePois(n)).catch(()=>{})}
+  setTimeout(()=>{if(mapInstance===thisMap)try{thisMap.invalidateSize();updateRouteStyle(thisMap)}catch{}},120);
+  setTimeout(()=>{if(mapInstance===thisMap)try{thisMap.invalidateSize();updateRouteStyle(thisMap)}catch{}},700);
 }
 
 
@@ -345,7 +411,12 @@ function closeDoubts(){const b=document.getElementById('doubtsBackdrop');if(!b)r
 
 function openStageBigMap(n){
   detail(n,'mapa');
-  setTimeout(()=>enterMapFullscreen(true),650);
+  const tryOpen=(attempt=0)=>{
+    const el=document.getElementById('stageMapTall');
+    if(el&&mapInstance){enterMapFullscreen(true);return}
+    if(attempt<10)setTimeout(()=>tryOpen(attempt+1),180);
+  };
+  setTimeout(()=>tryOpen(0),260);
 }
 function isViewportLandscape(){return window.innerWidth>window.innerHeight}
 function setLandscapeDirection(dir='right'){

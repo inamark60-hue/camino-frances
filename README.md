@@ -1,6 +1,14 @@
-# BUEN CAMINO — V4.9 PRO
+# BUEN CAMINO — V4.9.1 PRO
 
 Actualización centrada en **servicios útiles, cartografía y lectura del relieve**, manteniendo el proyecto sin APIs de pago.
+## Corrección V4.9.1
+
+- El mapa ya fija una **vista provisional inmediata** antes de esperar a los datos remotos, evitando la pantalla gris.
+- OpenStreetMap queda como **respaldo automático bajo OpenTopoMap**: si las teselas topográficas fallan, siempre queda cartografía visible.
+- Las descargas JSON tienen tiempo máximo y se usa el **trazado local verificado** como respaldo.
+- Se evita que dos inicializaciones de mapa se pisen entre sí al cambiar rápidamente de Resumen a Mapa grande.
+- Los servicios se cargan después y **ya no bloquean el dibujo del mapa**.
+
 
 ## Cambios principales
 

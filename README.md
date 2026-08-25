@@ -56,3 +56,14 @@ Fuente de trazado: Open Pilgrimages / OpenStreetMap (ODbL). Para Galicia, la Xun
 - El mapa general conserva segmentos GeoJSON separados para evitar unir tramos inconexos.
 - Las demás etapas no dibujan rutas aproximadas hasta completar su validación.
 - Caché PWA renovada a v3.
+
+
+## V3.1 — trazado local de la etapa 1
+- La etapa 1 ya no intenta descargar el GPX desde otra web al abrirse.
+- El trazado se incluye dentro de la propia PWA (`verified-routes.js`) para evitar bloqueos CORS.
+- Los puntos usados proceden del GPX publicado por Fundación ONCE para Saint-Jean-Pied-de-Port → Roncesvalles.
+- La aplicación mantiene la regla de seguridad: una etapa sin trazado validado no dibuja rutas aproximadas.
+- Caché renovada a `camino-frances-v31`.
+- El mapa base de OpenStreetMap sigue necesitando conexión para descargar teselas que no estén ya en caché.
+
+**Nota:** el trazado local de V3.1 está simplificado a una selección de puntos del GPX oficial para la visualización cartográfica. No debe usarse como navegación turn-by-turn ni sustituye la señalización física del Camino.

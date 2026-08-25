@@ -7,9 +7,7 @@ let caminoRouteCoords = null;
 let caminoStagesMeta = null;
 const CAMINO_ROUTE_URL='https://cdn.jsdelivr.net/gh/walktalkmeditate/open-pilgrimages@v1/routes/camino-frances/route.geojson';
 const CAMINO_STAGES_URL='https://cdn.jsdelivr.net/gh/walktalkmeditate/open-pilgrimages@v1/routes/camino-frances/stages.json';
-const VERIFIED_STAGE_GPX={
-  1:'https://caminodesantiago.fundaciononce.es/sites/default/files/etapas/308_a01a-saint-jean-de-pie-de-port-a-roncesvalles-en-desarrollo.gpx'
-};
+const VERIFIED_STAGE_GPX={};
 const favorites = new Set(JSON.parse(localStorage.getItem('camino-favorites')||'[]'));
 const doneStages = new Set(JSON.parse(localStorage.getItem('camino-done')||'[]').map(Number));
 
@@ -61,6 +59,8 @@ async function loadFullRoute(){
   const segs=geoJSONSegments(await r.json());if(!segs.length)throw new Error('vacía');return segs;
 }
 async function loadVerifiedStage(n){
+  const local=(typeof LOCAL_VERIFIED_STAGE_ROUTES!=='undefined')?LOCAL_VERIFIED_STAGE_ROUTES[n]:null;
+  if(local&&local.length>1) return local;
   const url=VERIFIED_STAGE_GPX[n];if(!url)return null;
   const r=await fetch(url,{cache:'no-store',mode:'cors'});if(!r.ok)throw new Error('gpx');
   const pts=parseGPX(await r.text());if(pts.length<2)throw new Error('gpx vacío');return pts;

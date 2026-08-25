@@ -87,3 +87,77 @@ body.map-focus .leaflet-control-container{font-size:12px}
 }
 
 @media (max-width:380px){.map-workspace{grid-template-rows:minmax(330px,58dvh) 195px}.elevation-head small{display:none}}
+
+/* BUEN CAMINO V4.6 PRO — orientación robusta y acceso directo al mapa grande */
+.map-chip-primary{background:#ffc400!important;color:#062b65!important;border-color:#e4b100!important}
+.map-preview{cursor:zoom-in;outline:0}
+.map-note strong{color:#17345f}
+
+/* Cuando Android mantiene el bloqueo vertical, esta clase gira SOLO el espacio de mapa.
+   Así el peregrino obtiene una vista horizontal real sin depender del giro automático del sistema. */
+@media (orientation:portrait){
+  body.map-focus.map-manual-landscape .map-workspace{
+    position:fixed!important;
+    top:50%!important;left:50%!important;right:auto!important;bottom:auto!important;
+    width:100dvh!important;height:100vw!important;
+    transform:translate(-50%,-50%) rotate(90deg)!important;
+    transform-origin:center center!important;
+    grid-template-columns:minmax(0,72%) minmax(220px,28%)!important;
+    grid-template-rows:1fr!important;
+    z-index:4900!important;
+  }
+  body.map-focus.map-manual-landscape .elevation-panel{border-top:0!important;border-left:2px solid #17345f!important}
+  body.map-focus.map-manual-landscape .elevation-head{height:58px!important;flex-basis:58px!important;padding:8px 9px!important}
+  body.map-focus.map-manual-landscape .elevation-head small{max-width:52%!important}
+  body.map-focus.map-manual-landscape .map-floats{flex-direction:column!important;right:10px!important;bottom:10px!important}
+  body.map-focus.map-manual-landscape .elevation-svg{min-height:0!important}
+}
+
+/* En mapa grande, el perfil siempre queda visible. */
+body.map-focus .elevation-panel{display:flex!important}
+body.map-focus .elevation-chart{min-height:0!important}
+
+/* Botones suficientemente grandes para uso caminando, pero sin ocultar demasiado mapa. */
+body.map-focus .map-float{min-height:38px}
+
+
+/* BUEN CAMINO V4.7 PRO — ruta legible al zoom + horizontal real también en mapa general */
+.route-zoom-note{font-size:11px;color:#66758a}
+
+/* El mapa general también puede rotarse internamente cuando Android mantiene el bloqueo vertical. */
+@media (orientation:portrait){
+  body.map-focus.map-global-focus.map-manual-landscape .map-shell.map-mode{
+    position:fixed!important;
+    top:50%!important;left:50%!important;right:auto!important;bottom:auto!important;
+    width:100dvh!important;height:100vw!important;
+    transform:translate(-50%,-50%) rotate(90deg)!important;
+    transform-origin:center center!important;
+    z-index:4900!important;border:0!important;border-radius:0!important;
+  }
+  body.map-focus.map-global-focus.map-manual-landscape.map-landscape-left .map-shell.map-mode{
+    transform:translate(-50%,-50%) rotate(-90deg)!important;
+  }
+  body.map-focus.map-global-focus.map-manual-landscape .map-shell.map-mode .mapbox.tall{
+    width:100%!important;height:100%!important;min-height:0!important;border:0!important;border-radius:0!important;
+  }
+  /* Etapas: elegir automáticamente el sentido de giro según cómo se tumba el teléfono. */
+  body.map-focus.map-manual-landscape.map-landscape-left:not(.map-global-focus) .map-workspace{
+    transform:translate(-50%,-50%) rotate(-90deg)!important;
+  }
+}
+
+/* En orientación física horizontal el mapa general ocupa toda la pantalla. */
+@media (orientation:landscape){
+  body.map-focus.map-global-focus .map-shell.map-mode,
+  body.map-focus.map-global-focus .mapbox.tall{
+    position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;border-radius:0!important;
+  }
+  body.map-focus.map-global-focus .map-floats{right:12px!important;bottom:12px!important;flex-direction:column!important}
+}
+
+/* Botones flotantes más compactos para no cubrir la ruta en horizontal. */
+body.map-focus .map-float{box-shadow:0 4px 14px #001f4660}
+
+
+/* V4.8 PRO · contacto telefónico de servicios */
+.poi-popup{min-width:190px;color:#1a2b45;line-height:1.35}.poi-popup>strong{display:block;font-size:15px;margin-bottom:3px}.poi-contact{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-top:10px;padding-top:9px;border-top:1px solid #e7ebf0}.poi-contact small{display:block;width:100%;font-size:9px;color:#6c7888}.poi-contact-load,.poi-call,.poi-web{border:0;border-radius:10px;padding:8px 10px;font-size:11px;font-weight:900;text-decoration:none}.poi-contact-load{background:#0a67c9;color:#fff}.poi-contact-load:disabled{opacity:.65}.poi-call{background:#178a3b;color:#fff}.poi-web{background:#eef4ff;color:#075ac5;border:1px solid #cfe0f6}.poi-hours{width:100%;font-size:10.5px;color:#4d5a6b}.poi-no-phone{font-size:10.5px;color:#687487}.phone-link{display:inline-flex;align-items:center;text-decoration:none;background:#178a3b;color:#fff;border-color:#178a3b}

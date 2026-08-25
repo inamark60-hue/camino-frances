@@ -1,17 +1,13 @@
-# BUEN CAMINO — V4.5 PRO
+# BUEN CAMINO — V4.8 PRO
 
-Guía Android/PWA del Camino Francés.
+Mejora de contactos de servicios y lugares útiles.
 
-## Cambios principales de esta versión
-- Mapa GRANDE real: ocupa toda la pantalla aunque Android no conceda el bloqueo de orientación.
-- En horizontal: mapa a la izquierda y perfil de desnivel a la derecha.
-- En vertical: mapa grande arriba y perfil de desnivel abajo.
-- Perfil interactivo: al deslizar el dedo por la gráfica aparece un punto amarillo en la gráfica y otro en la coordenada correspondiente del mapa.
-- Etapa 1: perfil basado en muestras de altitud verificadas del GPX de Fundación ONCE, sincronizadas con la geometría detallada del trazado.
-- Ruta más visible: puntos amarillos mayores y línea guía fina pero con mayor contraste.
-- Botón RUTA ON/OFF, GPS, Servicios y MAPA GRANDE.
-- Botón rojo DUDAS con relieve, calzado, mochila, equipo, pies, tiempo, orientación, emergencias y enlace oficial de primeros auxilios de Cruz Roja.
-- Identidad BUEN CAMINO e iconos propios.
+- Los puntos de **Dormir, Comer, Farmacia/Salud, Transporte, Suministros y otros servicios** muestran teléfono cuando la fuente abierta lo publica.
+- Si el teléfono no viene incluido en el waypoint, aparece **VER TELÉFONO** y la app consulta bajo demanda el objeto de OpenStreetMap asociado.
+- Los teléfonos se convierten en botones de llamada directa (`tel:`) en Android.
+- También se muestran web y horario cuando están publicados.
+- La consulta es bajo demanda para evitar tráfico innecesario y el resultado se guarda localmente.
+- Si una fuente no publica teléfono, BUEN CAMINO lo indica y no inventa datos.
+- Se mantienen V4.7: mapa topográfico, ruta adaptativa, giro horizontal, GPS, servicios, DUDAS, primeros auxilios y 112.
 
-## Criterio del proyecto
-Profesional, útil, muy visible, sencillo de manejar, preciso y gratuito. La cartografía ayuda a orientarse pero no sustituye la señalización física ni los avisos oficiales.
+Datos de infraestructura: Open Pilgrimages / OpenStreetMap (ODbL). La información de contacto puede cambiar y debe verificarse antes de depender de ella.

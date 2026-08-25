@@ -1,13 +1,29 @@
-# BUEN CAMINO — V4.8 PRO
+# BUEN CAMINO — V4.9 PRO
 
-Mejora de contactos de servicios y lugares útiles.
+Actualización centrada en **servicios útiles, cartografía y lectura del relieve**, manteniendo el proyecto sin APIs de pago.
 
-- Los puntos de **Dormir, Comer, Farmacia/Salud, Transporte, Suministros y otros servicios** muestran teléfono cuando la fuente abierta lo publica.
-- Si el teléfono no viene incluido en el waypoint, aparece **VER TELÉFONO** y la app consulta bajo demanda el objeto de OpenStreetMap asociado.
-- Los teléfonos se convierten en botones de llamada directa (`tel:`) en Android.
-- También se muestran web y horario cuando están publicados.
-- La consulta es bajo demanda para evitar tráfico innecesario y el resultado se guarda localmente.
-- Si una fuente no publica teléfono, BUEN CAMINO lo indica y no inventa datos.
-- Se mantienen V4.7: mapa topográfico, ruta adaptativa, giro horizontal, GPS, servicios, DUDAS, primeros auxilios y 112.
+## Cambios principales
 
-Datos de infraestructura: Open Pilgrimages / OpenStreetMap (ODbL). La información de contacto puede cambiar y debe verificarse antes de depender de ella.
+- **Puntos amarillos de la ruta interactivos**: al tocarlos, BUEN CAMINO selecciona el punto equivalente en el perfil de desnivel y muestra km, altitud y coordenadas cuando el perfil está disponible.
+- Cada punto de ruta ofrece accesos externos gratuitos a **Google Maps satélite**, **Google Earth web** y **OpenStreetMap**. No se usa Google Maps Platform ni Places API.
+- Los puntos amarillos son más grandes a niveles altos de zoom para poder seguir la ruta sin tapar el mapa.
+- **Autopistas (OSM `motorway`) resaltadas en azul** mediante una superposición obtenida de OpenStreetMap/Overpass cuando hay datos disponibles.
+- **Perfil de desnivel más pequeño** para dejar más superficie útil al mapa, tanto en vertical como en horizontal.
+- **Servicios de etapa renovados**: Dormir, Comer, Agua, Farmacia, Salud, Taxi, Bus/Tren, Tienda, Cajero, Lavandería, WC, Bicicleta, Sellos, Policía y Ayuntamiento.
+- Las fichas de servicios pueden mostrar **teléfono, web, horario, ubicación, km del Camino y coordenadas** cuando las fuentes abiertas los publican.
+- Botones directos a **OpenStreetMap, Google Maps, vista satélite y Google Earth** para cada lugar.
+- La pestaña **Alojamientos** carga alojamientos reales de fuentes abiertas en lugar de fichas de ejemplo cuando hay datos para la etapa.
+- **Meteorología AEMET**: en la Etapa 1 abre directamente la predicción oficial de Orreaga/Roncesvalles; el resto de etapas enlaza a la predicción municipal de AEMET mientras se incorporan los enlaces municipales específicos.
+- Se mantienen: mapa topográfico con curvas de nivel, RUTA ON/OFF, GPS, mapa grande/horizontal, DUDAS, Primeros Auxilios y 112.
+
+## Fuentes gratuitas
+
+- Open Pilgrimages / OpenStreetMap (ODbL) — ruta y puntos útiles.
+- OpenTopoMap — cartografía topográfica y curvas de nivel.
+- Overpass API — consultas OSM bajo demanda para servicios y autopistas.
+- AEMET — meteorología oficial mediante enlace público.
+- Google Maps URLs / Google Earth web — solo enlaces externos gratuitos; no se utiliza ninguna API de pago.
+
+## Importante
+
+La información de teléfonos, horarios y establecimientos puede cambiar. BUEN CAMINO muestra únicamente datos publicados en las fuentes abiertas y no inventa contactos, precios ni disponibilidad. El mapa es una ayuda al peregrino y no sustituye la señalización oficial, avisos meteorológicos ni indicaciones de emergencias.

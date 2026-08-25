@@ -1,1 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#062b65"/><g fill="#ffc400"><circle cx="150" cy="256" r="32"/><path d="M182 250h240v16H182zM164 217l207-120 8 14-207 120zm0 78 207 120 8-14-207-120zm2-106 118-176 14 9-118 176zm0 134 118 176 14-9-118-176zm-50-101L54 61l15-6 62 161zm0 68L54 451l15 6 62-161z"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<rect width="512" height="512" rx="96" fill="#063a7a"/>
+<circle cx="256" cy="92" r="16" fill="#ffc400"/>
+<path d="M256 112 L86 300 M256 112 L137 300 M256 112 L180 300 M256 112 L218 300 M256 112 L256 300 M256 112 L294 300 M256 112 L332 300 M256 112 L375 300 M256 112 L426 300" stroke="#ffc400" stroke-width="14" stroke-linecap="round"/>
+<text x="256" y="374" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="67" font-weight="700" fill="#fff">BUEN</text>
+<text x="256" y="435" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="52" font-weight="600" fill="#fff">CAMINO</text>
+</svg>

@@ -12,3 +12,42 @@ main{min-height:calc(100dvh - 158px)}.hero{background:linear-gradient(135deg,#0b
 @media(min-width:700px){body:before{content:"Vista optimizada exclusivamente para Android móvil";position:fixed;left:24px;top:24px;color:#5d6a7b;font-size:13px}.android-shell{min-height:100dvh}}
 /* V4 professional pilgrim cartography */
 .pro-banner{margin:14px 18px 0;padding:13px 14px;border-radius:15px;background:#eef6ec;border:1px solid #cee7c8;color:#164c25;display:flex;gap:5px;flex-direction:column;font-size:12px}.pro-banner strong{font-size:14px}.eyebrow{color:#ffc400;font-size:11px;font-weight:900;letter-spacing:1.2px;margin-bottom:6px}.warning-card{margin:16px 0;background:#fff6de;border:1px solid #f3d27a;border-radius:15px;padding:14px;color:#664a0c}.warning-card strong{display:block;margin-bottom:4px}.warning-card p,.safety-card p,.info-card p{margin:5px 0 0;line-height:1.45;font-size:12px}.safety-card,.info-card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px}.checklist{display:grid;grid-template-columns:1fr 1fr;gap:8px}.checklist span{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;font-size:12px}.map-toolbar{display:flex;gap:7px;padding:9px 10px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:121px;z-index:690;overflow:auto}.map-chip{border:1px solid #cfd8e5;background:#fff;color:#17345f;border-radius:999px;padding:8px 10px;white-space:nowrap;font-size:11px;font-weight:800}.map-chip.active{background:#062b65;color:#fff;border-color:#062b65}.route-source{margin-top:10px;padding:10px 12px;background:#edf4ff;border:1px solid #cfe0f6;border-radius:12px;color:#234b79;font-size:11px;font-weight:700}.poi-legend{margin-top:10px;display:flex;flex-direction:column;gap:2px;font-size:11px;color:#56657a}.poi-legend strong{color:#17345f}.poi-div-icon span{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:white;border:2px solid #17345f;box-shadow:0 2px 7px #0003;font-size:15px}.service-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 8px;margin-bottom:18px}.full{margin:0;width:100%}.leaflet-control-layers{font-size:12px}.leaflet-control-scale-line{font-weight:700}.mapbox .leaflet-tile-pane{filter:saturate(.92) contrast(1.03)}
+
+
+/* BUEN CAMINO V4.3 — mapa limpio y horizontal */
+.hero-sub{font-size:.72em;color:#dcecff;font-weight:750}
+.map-shell{position:relative;background:#dbe6ef}
+.map-floats{position:absolute;right:10px;bottom:14px;z-index:760;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none}
+.map-float{pointer-events:auto;border:1px solid #d7dfeb;background:rgba(255,255,255,.94);color:#17345f;border-radius:999px;padding:9px 12px;font-size:11px;font-weight:900;box-shadow:0 3px 12px #001a3a35;backdrop-filter:blur(5px)}
+.map-float.active{background:#062b65;color:#fff;border-color:#062b65}
+.map-mode .leaflet-control-layers{margin-top:10px;margin-right:10px}
+.map-mode .leaflet-control-layers-toggle{width:42px;height:42px;background-size:24px 24px}
+@media (orientation:landscape) and (max-height:600px){
+  html,body,.android-shell{width:100%;max-width:none;min-height:100dvh;height:100dvh;overflow:hidden}
+  .android-shell{padding-bottom:0;box-shadow:none}
+  .topbar{height:48px;padding:5px 12px;position:fixed;left:0;right:0;top:0;z-index:1200}
+  .brand{gap:8px}.brand strong{font-size:14px}.brand span{font-size:10px}.shell-logo{font-size:24px}
+  main{height:100dvh;min-height:100dvh;padding-top:48px}
+  .bottom-nav{display:none}
+  .detail-head,.detail-tabs{display:none}
+  .map-actions{display:none}
+  .map-shell,.map-shell .mapbox.tall{height:calc(100dvh - 48px)!important;min-height:calc(100dvh - 48px)!important;border-radius:0}
+  .map-shell{position:fixed;left:0;right:0;top:48px;bottom:0;z-index:800}
+  .map-floats{right:12px;bottom:14px}
+  .map-float{padding:8px 11px}
+  .toast{bottom:14px}
+}
+
+/* BUEN CAMINO V4.4 — logo, DUDAS y mapa grande */
+.top-actions{display:flex;align-items:center;gap:7px}
+.doubts-btn{height:38px;border:0;border-radius:11px;background:#d72929;color:#fff;padding:0 10px;display:flex;align-items:center;gap:6px;font-size:11px;font-weight:950;box-shadow:0 3px 10px #46000030}
+.doubts-btn span{width:20px;height:20px;border:2px solid #fff;border-radius:50%;display:grid;place-items:center;line-height:1;font-size:13px}
+.home-logo{display:block;width:min(210px,70vw);height:auto;margin:-4px auto 14px;border-radius:18px;box-shadow:0 8px 24px #001b4835}
+.doubts-backdrop{position:fixed;inset:0;z-index:5000;background:#071a2f8f;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px);opacity:0;transition:opacity .18s}
+.doubts-backdrop.open{opacity:1}.doubts-backdrop[hidden]{display:none}
+.doubts-sheet{width:min(100%,480px);max-height:88dvh;overflow:hidden;background:#f6f8fb;border-radius:22px 22px 0 0;box-shadow:0 -15px 45px #00132666;transform:translateY(24px);transition:transform .18s;display:flex;flex-direction:column}
+.doubts-backdrop.open .doubts-sheet{transform:translateY(0)}
+.doubts-head{padding:15px 16px 12px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:start;justify-content:space-between;gap:10px}.doubts-head h2{font-size:18px;margin:2px 0 0;color:#12233d}.doubts-kicker{font-size:10px;font-weight:950;letter-spacing:1.2px;color:#d72929}.doubts-head button{width:36px;height:36px;border-radius:50%;border:0;background:#eef1f5;color:#172b48;font-size:25px;line-height:1}
+.doubts-body{overflow:auto;padding:12px 14px calc(20px + env(safe-area-inset-bottom))}.doubts-body details{background:#fff;border:1px solid var(--line);border-radius:13px;margin-bottom:8px;overflow:hidden}.doubts-body summary{list-style:none;padding:12px 13px;font-weight:900;color:#17345f;cursor:pointer}.doubts-body summary::-webkit-details-marker{display:none}.doubts-body details[open] summary{border-bottom:1px solid #eef1f5}.doubt-copy{padding:10px 13px 12px;color:#3d4b5e;font-size:12.5px;line-height:1.5}.doubt-copy p{margin:0 0 8px}.doubt-copy p:last-child{margin-bottom:0}.doubt-stage{background:#fff4dc;border:1px solid #f0cf77;border-radius:14px;padding:12px;margin-bottom:10px}.doubt-stage span{display:block;color:#8b6000;font-size:10px;font-weight:950;letter-spacing:.8px}.doubt-stage strong{display:block;margin:3px 0 5px;color:#24344d}.doubt-stage p{margin:0;color:#5f4b1c;font-size:12px;line-height:1.45}.doubt-list{display:grid;grid-template-columns:1fr 1fr;gap:7px}.doubt-list span{background:#f6f8fb;border-radius:9px;padding:8px;font-size:11px}.doubt-emergency{background:#fff0ef;border:1px solid #ffc8c3;border-radius:14px;padding:11px;display:flex;align-items:center;justify-content:space-between;gap:10px;color:#7f1e19}.doubt-emergency strong,.doubt-emergency span{display:block}.doubt-emergency span{font-size:10px;margin-top:3px}.doubt-emergency a{background:#d72929;color:#fff;text-decoration:none;font-weight:950;border-radius:10px;padding:10px 11px;white-space:nowrap}.doubt-source{font-size:10px;line-height:1.45;color:#6e7886;margin:10px 3px 0}.modal-open{overflow:hidden}
+.map-shell:fullscreen{background:#dbe6ef}.map-shell:fullscreen .mapbox.tall{height:100dvh!important}.map-shell:fullscreen .map-floats{bottom:18px}.map-shell:fullscreen .leaflet-control-zoom{margin-top:12px}
+@media (orientation:landscape) and (max-height:600px){.doubts-label{display:none}.doubts-btn{width:34px;padding:0;justify-content:center}.doubts-btn span{border:0}.home-logo{display:none}.map-floats{flex-direction:row;bottom:10px}.map-float{font-size:10px;padding:7px 9px}.doubts-sheet{max-height:96dvh;width:min(520px,90vw);border-radius:18px 18px 0 0}.doubts-body{padding-bottom:10px}.doubt-list{grid-template-columns:repeat(3,1fr)}}

@@ -1,13 +1,13 @@
 {
-  "name": "Camino Francés — Guía Android",
-  "short_name": "Camino Francés",
-  "description": "Guía móvil gratuita del Camino Francés, optimizada para Android.",
+  "name": "BUEN CAMINO — Guía del Camino Francés",
+  "short_name": "BUEN CAMINO",
+  "description": "BUEN CAMINO: guía móvil gratuita, precisa y sencilla del Camino Francés para Android.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f4f7fb",
   "theme_color": "#062b65",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "icons": [
     {
       "src": "icon-192.png",

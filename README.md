@@ -1,37 +1,33 @@
-# Camino Francés V4 PRO
+# BUEN CAMINO — V4.3 PRO
 
-PWA gratuita optimizada para Android.
+Guía Android del Camino Francés.
 
-## Qué cambia en V4
-- Mapa topográfico por defecto con OpenTopoMap: relieve y curvas de nivel.
-- Alternancia entre mapa topográfico y OpenStreetMap.
-- Escala métrica y GPS de alta precisión con radio de error.
-- Trazado de alta resolución desde Open Pilgrimages cuando hay conexión; respaldo local para la etapa 1.
-- Servicios abiertos sobre el recorrido: agua, salud, alojamiento, comida, transporte y suministros.
-- Accesos rápidos ampliados: albergues/hoteles, comida, agua, farmacia, salud, taxi, bus/tren, supermercado, cajero, lavandería, WC, bicicletas, credencial/sellos, policía, ayuntamiento y emergencias.
-- Seguridad: 112 y aviso de que el mapa es ayuda, no sustituto de la señalización física.
-- Caché de la aplicación y de datos abiertos consultados para mejorar uso con mala cobertura.
+## Cambios de esta versión
+- Nuevo nombre de la app: **BUEN CAMINO**.
+- Se elimina la banda permanente Topográfico / Calles / Servicios.
+- Las capas se gestionan desde el botón compacto de Leaflet.
+- Botón flotante **RUTA ON/OFF** sobre el mapa.
+- La orientación deja de estar bloqueada en vertical.
+- En horizontal, el mapa ocupa prácticamente toda la pantalla y se ocultan elementos secundarios.
+- El mapa recalcula su tamaño al girar el teléfono.
+- Se conserva OpenTopoMap con relieve y curvas de nivel.
 
-## Fuentes y licencias
-- OpenTopoMap: datos OpenStreetMap + SRTM; estilo OpenTopoMap CC-BY-SA. Attribution visible en el mapa.
-- Open Pilgrimages: datos ODbL; geometría y waypoints de OpenStreetMap.
-- Etapa 1: parámetros de altitud y advertencias contrastados con Fundación ONCE.
-- Para las etapas españolas, la referencia cartográfica oficial a integrar/contrastar es CNIG/IGN + FEAACS (CC-BY 4.0, ficheros por etapa GPX/KML).
-
-## Importante
-Esta V4 mejora mucho la cartografía, pero no debe presentarse como navegación de seguridad o giro a giro. El Camino real, señalización, cierres temporales y avisos oficiales tienen prioridad.
+La cartografía es una ayuda al peregrino y no sustituye la señalización oficial del Camino.
 
 
-## V4.2 PRO — trazado legible
+## V4.4 PRO — DUDAS + mapa grande + identidad BUEN CAMINO
 
-- Sustituye la línea gruesa por una guía fina semitransparente.
-- Superpone puntos amarillos del Camino para seguir la ruta sin ocultar senderos, cruces ni curvas de nivel.
-- Mantiene OpenTopoMap como base topográfica por defecto.
-- Renueva la caché PWA a v41.
-- La cartografía sigue siendo una ayuda y no sustituye la señalización física ni avisos oficiales.
+- Integra el logotipo BUEN CAMINO aprobado en la portada.
+- Añade botón rojo **DUDAS** siempre accesible.
+- Consejos: relieve, calzado, mochila, accesorios imprescindibles, pies, meteorología, agua/comida y qué hacer si se pierde la ruta.
+- Consejo de relieve adaptado a la etapa abierta.
+- Acceso directo al 112 dentro de DUDAS.
+- Añade controles compactos GPS y **GRANDE** en el mapa; intenta entrar en pantalla completa y orientación horizontal cuando Android lo permite.
+- Mantiene **RUTA ON/OFF** para limpiar la cartografía.
+- Consejos de equipamiento basados en Camino de Santiago en Galicia (oficial) y Spain.info.
 
 
-## V4.2 — control de ruta
-- Botón `Ruta ON/OFF` en los mapas.
-- Oculta o muestra la guía fina y los puntos amarillos sin quitar la cartografía topográfica.
-- La preferencia queda guardada en el teléfono.
+## V4.4.1 — identidad visual
+- Los iconos Android/PWA usan el nuevo logotipo BUEN CAMINO.
+- Se actualiza también el favicon del navegador.
+- Caché renovada para forzar la actualización de iconos instalados.

@@ -48,3 +48,11 @@ Los datos de alojamientos y servicios de la Etapa 30 son deliberadamente demostr
 - El service worker usa una caché nueva (`camino-frances-v2`) para forzar la actualización de la app instalada.
 
 Fuente de trazado: Open Pilgrimages / OpenStreetMap (ODbL). Para Galicia, la Xunta de Galicia también publica el KML oficial del Camino Francés.
+
+
+## V3 — corrección cartográfica
+- Se elimina el recorte automático que podía asignar una etapa a una zona incorrecta.
+- La etapa 1 usa un GPX específico de Fundación ONCE (ruta de Napoleón).
+- El mapa general conserva segmentos GeoJSON separados para evitar unir tramos inconexos.
+- Las demás etapas no dibujan rutas aproximadas hasta completar su validación.
+- Caché PWA renovada a v3.

@@ -1,107 +1,91 @@
-const app = document.getElementById('app');
-const toastEl = document.getElementById('toast');
-let currentView = 'home';
-let deferredPrompt;
-let mapInstance;
-let caminoRouteCoords = null;
-let caminoStagesMeta = null;
-const CAMINO_ROUTE_URL='https://cdn.jsdelivr.net/gh/walktalkmeditate/open-pilgrimages@v1/routes/camino-frances/route.geojson';
-const CAMINO_STAGES_URL='https://cdn.jsdelivr.net/gh/walktalkmeditate/open-pilgrimages@v1/routes/camino-frances/stages.json';
-const VERIFIED_STAGE_GPX={};
-const favorites = new Set(JSON.parse(localStorage.getItem('camino-favorites')||'[]'));
-const doneStages = new Set(JSON.parse(localStorage.getItem('camino-done')||'[]').map(Number));
+const app=document.getElementById('app');
+const toastEl=document.getElementById('toast');
+let currentView='home',deferredPrompt,mapInstance,mapLayers={};
+const favorites=new Set(JSON.parse(localStorage.getItem('camino-favorites')||'[]'));
+const doneStages=new Set(JSON.parse(localStorage.getItem('camino-done')||'[]').map(Number));
 
-const esc=s=>String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-function toast(msg){toastEl.textContent=msg;toastEl.classList.add('show');setTimeout(()=>toastEl.classList.remove('show'),2200)}
+const DATA_BASE='https://cdn.jsdelivr.net/gh/walktalkmeditate/open-pilgrimages@v1/routes/camino-frances';
+const ROUTE_URL=`${DATA_BASE}/route.geojson`;
+const WAYPOINTS_URL=`${DATA_BASE}/waypoints.geojson`;
+const STAGES_URL=`${DATA_BASE}/stages.json`;
+let remoteRoute=null,remoteWaypoints=null,remoteStages=null;
+
+const STAGE_BBOX={1:{minLat:42.995,maxLat:43.175,minLon:-1.335,maxLon:-1.205}};
+const TYPE_LABEL={water_source:'Agua',medical:'Farmacia / salud',accommodation:'Dormir',food:'Comer',transport:'Transporte',supply:'Suministros / WC',credential_stamp:'Sello',information:'Información',viewpoint:'Mirador',cultural_site:'Cultura',sacred_site:'Lugar jacobeo',town:'Localidad',camping:'Camping',pass:'Puerto',waymarker:'Señal'};
+const TYPE_ICON={water_source:'💧',medical:'✚',accommodation:'🛏',food:'🍴',transport:'🚌',supply:'🛒',credential_stamp:'🟨',information:'ℹ️',viewpoint:'👁',cultural_site:'🏛',sacred_site:'⛪',town:'📍',camping:'⛺',pass:'⛰',waymarker:'➡️'};
+
+const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+function toast(msg){toastEl.textContent=msg;toastEl.classList.add('show');setTimeout(()=>toastEl.classList.remove('show'),2400)}
 function save(){localStorage.setItem('camino-favorites',JSON.stringify([...favorites]));localStorage.setItem('camino-done',JSON.stringify([...doneStages]))}
-function setActive(nav){document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.toggle('active',b.dataset.nav===nav));}
+function setActive(nav){document.querySelectorAll('.bottom-nav button').forEach(b=>b.classList.toggle('active',b.dataset.nav===nav))}
 function kmTotal(){return STAGES.reduce((a,s)=>a+s.km,0)}
+function stageCard(s){return `<article class="stage-card ${s.n===1?'featured':''}" data-stage="${s.n}" role="button" tabindex="0"><div class="num">${s.n}</div><div><h3>${esc(s.from)} → ${esc(s.to)}</h3><div class="meta">${s.km.toFixed(1)} km · ${s.h} · ${s.difficulty}</div></div><div class="arrow">›</div></article>`}
 
-function stageCard(s){return `<article class="stage-card ${s.n===1?'featured':''}" data-stage="${s.n}" role="button" tabindex="0"><div class="num">${s.n}</div><div><h3>${esc(s.from)} → ${esc(s.to)}</h3><div class="meta">${s.km.toFixed(1)} km · ${s.h} · Dificultad ${s.difficulty.toLowerCase()}</div></div><div class="arrow">›</div></article>`}
+function quickButtons(){return [
+ ['🛏','Dormir','alojamiento'],['🍴','Comer','restaurante'],['💧','Agua','fuente'],['✚','Farmacia','farmacia'],
+ ['❤','Salud','centro de salud'],['🚕','Taxi','taxi'],['🚌','Bus / Tren','transporte'],['🛒','Tienda','supermercado'],
+ ['🏧','Cajero','cajero automático'],['🧺','Lavandería','lavandería'],['🚻','WC','aseos públicos'],['🚲','Bicicleta','taller bicicletas'],
+ ['🟨','Sellos','credencial peregrino'],['🛡','Policía','policía guardia civil'],['🏛','Ayuntamiento','ayuntamiento'],['⚠','Emergencias','emergencia']
+].map(x=>`<button class="quick" data-service="${x[2]}"><span class="qicon">${x[0]}</span>${x[1]}</button>`).join('')}
+
 function home(){currentView='home';setActive('home');app.innerHTML=`
-<section class="hero"><h1>Tu Camino Francés<br>en el bolsillo</h1><p>33 etapas desde Saint-Jean-Pied-de-Port hasta Santiago. Diseñada para Android, sin cuotas ni APIs de pago.</p><span class="pill">PWA GRATUITA · PROTOTIPO</span></section>
+<section class="hero"><h1>Camino Francés<br>cartografía de peregrino</h1><p>33 etapas, mapa topográfico, GPS, servicios y datos abiertos. Pensada exclusivamente para Android.</p><span class="pill">GRATUITA · PWA · V4 PRO</span></section>
+<section class="pro-banner"><strong>🗺 Cartografía topográfica</strong><span>Curvas de nivel, relieve y trazado GPS cuando está disponible.</span></section>
 <section class="section"><div class="section-head"><h2>Las 33 etapas</h2><button class="link-btn" data-nav="stages">Ver todas</button></div>${STAGES.slice(0,5).map(stageCard).join('')}</section>
-<button class="location-cta" id="whereBtn">📍 ¿DÓNDE ESTOY AHORA?<small>Localiza tu posición y abre servicios cercanos</small></button>
-<section class="section"><div class="section-head"><h2>Accesos rápidos</h2></div><div class="quick-grid">${quickButtons()}</div></section>`; bindCommon()}
-function quickButtons(){return [['🛏','Dormir','alojamiento'],['🍴','Comer','comer'],['✚','Farmacias','farmacia'],['❤','Salud','salud'],['🚕','Taxi','taxi'],['🛡','Policía','policia'],['🏛','Ayuntamiento','ayuntamiento'],['⚠','Emergencias','emergencia']].map(x=>`<button class="quick" data-service="${x[2]}"><span class="qicon">${x[0]}</span>${x[1]}</button>`).join('')}
+<button class="location-cta" id="whereBtn">📍 ¿DÓNDE ESTOY AHORA?<small>GPS del teléfono · alta precisión si Android la permite</small></button>
+<section class="section"><div class="section-head"><h2>Todo lo que usa un peregrino</h2></div><div class="quick-grid">${quickButtons()}</div></section>
+<section class="section"><div class="safety-card"><strong>⚠ Seguridad</strong><p>112 funciona como número europeo de emergencias. La cartografía es una ayuda: sigue siempre la señalización del Camino y las indicaciones oficiales.</p></div></section>`;bindCommon()}
+
 function stages(){currentView='stages';setActive('stages');app.innerHTML=`<section class="section"><div class="section-head"><h2>Etapas del Camino Francés</h2></div><input class="search" id="stageSearch" placeholder="Buscar etapa o localidad…" autocomplete="off"><div id="stageList">${STAGES.map(stageCard).join('')}</div></section>`;bindCommon();document.getElementById('stageSearch').addEventListener('input',e=>{const q=e.target.value.toLowerCase().trim();document.getElementById('stageList').innerHTML=STAGES.filter(s=>(s.from+' '+s.to).toLowerCase().includes(q)).map(stageCard).join('')||'<div class="empty">No hay resultados.</div>';bindStageCards()})}
-function detail(n,tab='resumen'){const s=STAGES.find(x=>x.n===n);currentView=`detail-${n}`;setActive('stages');app.innerHTML=`<section class="detail-head"><div class="backline"><button id="backStages">‹ Volver</button><button class="fav ${favorites.has('stage-'+n)?'on':''}" data-fav="stage-${n}">♥</button></div><h1>${esc(s.from)} → ${esc(s.to)}</h1><div class="detail-stats"><span>🚶 ${s.km.toFixed(1)} km</span><span>◷ ${s.h}</span><span>▥ ${s.difficulty}</span></div></section><div class="detail-tabs">${['resumen','alojamientos','servicios','mapa'].map(t=>`<button data-tab="${t}" class="${tab===t?'active':''}">${t.toUpperCase()}</button>`).join('')}</div><div id="detailBody"></div>`;
+
+function detail(n,tab='resumen'){const s=STAGES.find(x=>x.n===n);currentView=`detail-${n}`;setActive('stages');app.innerHTML=`<section class="detail-head"><div class="backline"><button id="backStages">‹ Volver</button><button class="fav ${favorites.has('stage-'+n)?'on':''}" data-fav="stage-${n}">♥</button></div><div class="eyebrow">ETAPA ${n}</div><h1>${esc(s.from)} → ${esc(s.to)}</h1><div class="detail-stats"><span>🚶 ${s.km.toFixed(1)} km</span><span>◷ ${s.h}</span><span>⛰ +${s.gain} m</span><span>▥ ${s.difficulty}</span></div></section><div class="detail-tabs">${['resumen','mapa','servicios','alojamientos'].map(t=>`<button data-tab="${t}" class="${tab===t?'active':''}">${t.toUpperCase()}</button>`).join('')}</div><div id="detailBody"></div>`;
 document.getElementById('backStages').onclick=stages;document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>detail(n,b.dataset.tab));bindFav();renderDetailBody(s,tab)}
-function renderDetailBody(s,tab){const body=document.getElementById('detailBody'); if(tab==='resumen'){body.innerHTML=`<section class="section"><div class="stat-grid"><div class="stat">🚶<strong>${s.km.toFixed(1)} km</strong><span>Distancia</span></div><div class="stat">◷<strong>${s.h}</strong><span>Tiempo</span></div><div class="stat">⛰<strong>${s.gain} m</strong><span>Desnivel +</span></div><div class="stat">▥<strong>${s.difficulty}</strong><span>Dificultad</span></div></div><h2>Descripción</h2><p class="copy">Ficha preparada para incorporar información verificada del recorrido, advertencias, puntos de agua, desniveles y recomendaciones. La estructura ya está lista para cargar los datos definitivos de cada etapa.</p>${s.towns?`<h2>Pueblos en la etapa</h2><div class="towns">${s.towns.map(t=>`<span class="town">${t}</span>`).join('')}</div>`:''}<h2>Mapa</h2><div id="stageMap" class="mapbox"></div><div class="map-note">Mapa: OpenStreetMap + Leaflet, ambos sin licencia comercial de pago.</div></section>`;setTimeout(()=>makeMap(s.n,'stageMap',false),0)}
-else if(tab==='alojamientos'){const rows=s.n===30?STAGE30_SERVICES.filter(x=>x.type==='alojamiento'):[];body.innerHTML=`<section class="section"><div class="section-head"><h2>Alojamientos</h2></div>${rows.length?rows.map(serviceCard).join(''):'<div class="empty"><div class="big">🛏</div><p>La estructura está lista. Los alojamientos reales se cargarán con fuentes verificadas y precios orientativos.</p></div>'}</section>`;bindFav()}
-else if(tab==='servicios'){const rows=s.n===30?STAGE30_SERVICES:[];body.innerHTML=`<section class="section"><div class="emergency"><strong>⚠ Emergencias</strong>Para una emergencia real en España, llama al 112.</div><h2>Servicios de la etapa</h2>${rows.length?rows.map(serviceCard).join(''):'<div class="empty"><div class="big">📍</div><p>Servicios pendientes de carga para esta etapa. El modelo de datos ya está preparado.</p></div>'}</section>`;bindFav()}
-else{body.innerHTML=`<div id="stageMapTall" class="mapbox tall"></div><section class="section"><button class="location-cta" style="margin:0;width:100%" id="locateOnMap">📍 MOSTRAR MI UBICACIÓN</button></section>`;setTimeout(()=>{makeMap(s.n,'stageMapTall',false);document.getElementById('locateOnMap').onclick=locateUser},0)}}
-function serviceCard(x){return `<article class="service-card"><div><span class="badge">${esc(x.type)}</span><h3>${esc(x.name)}</h3><p>${esc(x.sub)}</p><p>${esc(x.note)}</p><div class="service-actions">${x.phone?`<button class="mini-btn" data-phone="${x.phone}">☎ ${x.phone}</button>`:''}<button class="mini-btn" data-osm="${esc(x.name)}">🗺 Buscar</button></div></div><div><div class="price">${esc(x.price)}</div><button class="fav ${favorites.has(x.id)?'on':''}" data-fav="${x.id}">♥</button></div></article>`}
-function mapView(){currentView='map';setActive('map');app.innerHTML=`<div id="mainMap" class="mapbox tall"></div><section class="section"><button class="location-cta" style="margin:0;width:100%" id="mapLocate">📍 MOSTRAR MI UBICACIÓN</button><p class="map-note">Mapa completo de referencia. Las etapas individuales solo muestran trazados cuando han sido verificadas; nunca se dibuja una aproximación.</p></section>`;setTimeout(()=>{makeMap(null,'mainMap',true);document.getElementById('mapLocate').onclick=locateUser},0)}
-function favoritesView(){currentView='favorites';setActive('favorites');const st=[...favorites].filter(x=>x.startsWith('stage-')).map(x=>STAGES.find(s=>s.n===Number(x.split('-')[1]))).filter(Boolean);app.innerHTML=`<section class="section"><div class="section-head"><h2>Favoritos</h2></div>${st.length?st.map(stageCard).join(''):'<div class="empty"><div class="big">♡</div><p>Guarda etapas y servicios con el corazón para encontrarlos aquí.</p></div>'}</section>`;bindStageCards()}
-function myCamino(){currentView='mycamino';setActive('mycamino');const done=[...doneStages].map(n=>STAGES.find(s=>s.n===n)).filter(Boolean);const km=done.reduce((a,s)=>a+s.km,0);const pct=Math.round(doneStages.size/STAGES.length*100);app.innerHTML=`<section class="section"><div class="section-head"><h2>Mi Camino</h2></div><div class="progress-card"><strong>${doneStages.size} de 33 etapas completadas</strong><div class="progress-track"><div class="progress-bar" style="width:${pct}%"></div></div><div class="meta">${km.toFixed(1)} km registrados de ${kmTotal().toFixed(1)} km en esta planificación</div></div><h2>Marcar etapas</h2>${STAGES.map(s=>`<div class="my-stage" data-done="${s.n}"><button class="check ${doneStages.has(s.n)?'done':''}">${doneStages.has(s.n)?'✓':''}</button><div><strong>Etapa ${s.n}</strong><div class="meta">${esc(s.from)} → ${esc(s.to)}</div></div></div>`).join('')}</section>`;document.querySelectorAll('[data-done]').forEach(r=>r.onclick=()=>{const n=Number(r.dataset.done);doneStages.has(n)?doneStages.delete(n):doneStages.add(n);save();myCamino()})}
-function geoJSONSegments(gj){
-  const out=[];
-  const add=line=>{
-    const seg=(line||[]).map(c=>[Number(c[1]),Number(c[0])]).filter(c=>Number.isFinite(c[0])&&Number.isFinite(c[1]));
-    if(seg.length>1) out.push(seg);
-  };
-  (gj?.features||[]).forEach(f=>{
-    const g=f?.geometry;if(!g)return;
-    if(g.type==='LineString') add(g.coordinates);
-    else if(g.type==='MultiLineString') (g.coordinates||[]).forEach(add);
-  });
-  return out;
-}
-function parseGPX(text){
-  const xml=new DOMParser().parseFromString(text,'application/xml');
-  const pts=[...xml.querySelectorAll('trkpt')].map(p=>[Number(p.getAttribute('lat')),Number(p.getAttribute('lon'))]).filter(c=>Number.isFinite(c[0])&&Number.isFinite(c[1]));
-  if(pts.length>1)return pts;
-  return [...xml.querySelectorAll('rtept')].map(p=>[Number(p.getAttribute('lat')),Number(p.getAttribute('lon'))]).filter(c=>Number.isFinite(c[0])&&Number.isFinite(c[1]));
-}
-async function loadFullRoute(){
-  const r=await fetch(CAMINO_ROUTE_URL,{cache:'no-store'});if(!r.ok)throw new Error('ruta');
-  const segs=geoJSONSegments(await r.json());if(!segs.length)throw new Error('vacía');return segs;
-}
-async function loadVerifiedStage(n){
-  const local=(typeof LOCAL_VERIFIED_STAGE_ROUTES!=='undefined')?LOCAL_VERIFIED_STAGE_ROUTES[n]:null;
-  if(local&&local.length>1) return local;
-  const url=VERIFIED_STAGE_GPX[n];if(!url)return null;
-  const r=await fetch(url,{cache:'no-store',mode:'cors'});if(!r.ok)throw new Error('gpx');
-  const pts=parseGPX(await r.text());if(pts.length<2)throw new Error('gpx vacío');return pts;
-}
-async function makeMap(n,id,fullRoute=false){
-  if(mapInstance){try{mapInstance.remove()}catch(e){} mapInstance=null}
-  const el=document.getElementById(id);
-  if(!el||typeof L==='undefined'){if(el)el.innerHTML='<div class="empty">El mapa necesita conexión la primera vez.</div>';return}
-  el.innerHTML='<div class="empty">Cargando cartografía…</div>';
-  try{
-    mapInstance=L.map(id,{zoomControl:true});
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(mapInstance);
-    if(fullRoute){
-      const segs=await loadFullRoute();
-      const group=L.featureGroup();
-      segs.forEach(seg=>L.polyline(seg,{color:'#0867d6',weight:4,opacity:.9}).addTo(group));
-      group.addTo(mapInstance);mapInstance.fitBounds(group.getBounds(),{padding:[18,18]});
-    }else{
-      const coords=await loadVerifiedStage(n);
-      if(!coords){
-        const st=STAGES.find(x=>x.n===n);
-        el.innerHTML=`<div class="empty"><div class="big">🗺</div><p><strong>${esc(st.from)} → ${esc(st.to)}</strong></p><p>Esta etapa todavía está en validación cartográfica. En V3 no mostramos trazados aproximados.</p></div>`;
-        try{mapInstance.remove()}catch(e){} mapInstance=null;return;
-      }
-      const line=L.polyline(coords,{color:'#0867d6',weight:5,opacity:.95}).addTo(mapInstance);
-      mapInstance.fitBounds(line.getBounds(),{padding:[18,18]});
-      L.marker(coords[0]).addTo(mapInstance).bindPopup('Inicio: '+STAGES.find(x=>x.n===n).from);
-      L.marker(coords[coords.length-1]).addTo(mapInstance).bindPopup('Final: '+STAGES.find(x=>x.n===n).to);
-    }
-    setTimeout(()=>mapInstance&&mapInstance.invalidateSize(),100);
-  }catch(err){
-    try{if(mapInstance)mapInstance.remove()}catch(e){} mapInstance=null;
-    el.innerHTML='<div class="empty"><div class="big">🗺</div><p>No se pudo cargar el trazado verificado. Comprueba la conexión. No se mostrará una ruta aproximada.</p></div>';
-  }
-}
-function locateUser(){if(!navigator.geolocation){toast('Este dispositivo no ofrece geolocalización.');return}toast('Solicitando ubicación…');navigator.geolocation.getCurrentPosition(p=>{const {latitude,longitude}=p.coords;if(mapInstance){L.marker([latitude,longitude]).addTo(mapInstance).bindPopup('Estás aquí').openPopup();mapInstance.setView([latitude,longitude],14)}else{mapView();setTimeout(()=>{if(mapInstance){L.marker([latitude,longitude]).addTo(mapInstance).bindPopup('Estás aquí').openPopup();mapInstance.setView([latitude,longitude],14)}},500)}toast('Ubicación encontrada.')},()=>toast('No se pudo obtener la ubicación. Revisa los permisos.'),{enableHighAccuracy:true,timeout:8000})}
-function serviceSearch(type){if(type==='emergencia'){toast('Emergencias en España: 112');return}const q=encodeURIComponent(type+' cerca de mí');window.open('https://www.openstreetmap.org/search?query='+q,'_blank','noopener')}
-function bindFav(){document.querySelectorAll('[data-fav]').forEach(b=>b.onclick=e=>{e.stopPropagation();const id=b.dataset.fav;favorites.has(id)?favorites.delete(id):favorites.add(id);save();b.classList.toggle('on',favorites.has(id));toast(favorites.has(id)?'Añadido a favoritos':'Eliminado de favoritos')});document.querySelectorAll('[data-phone]').forEach(b=>b.onclick=()=>location.href='tel:'+b.dataset.phone);document.querySelectorAll('[data-osm]').forEach(b=>b.onclick=()=>window.open('https://www.openstreetmap.org/search?query='+encodeURIComponent(b.dataset.osm),'_blank','noopener'))}
+
+function renderDetailBody(s,tab){const body=document.getElementById('detailBody');
+ if(tab==='resumen'){
+   const stage1=s.n===1?`<div class="warning-card"><strong>⛰ Alta montaña</strong><p>Ruta de Napoleón. No recomendada entre noviembre y marzo. Altitud mínima publicada: 168 m; máxima: 1.450 m; desnivel publicado: 1.281 m.</p></div>`:'';
+   body.innerHTML=`<section class="section"><div class="stat-grid"><div class="stat">🚶<strong>${s.km.toFixed(1)} km</strong><span>Distancia plan</span></div><div class="stat">◷<strong>${s.h}</strong><span>Tiempo</span></div><div class="stat">⛰<strong>+${s.gain} m</strong><span>Desnivel</span></div><div class="stat">▥<strong>${s.difficulty}</strong><span>Dificultad</span></div></div>${stage1}<h2>Preparación de etapa</h2><div class="checklist"><span>💧 Agua y comida</span><span>🌦 Meteorología</span><span>🔋 Batería / powerbank</span><span>🩹 Botiquín</span><span>🪪 Credencial</span><span>🧥 Capa y abrigo</span></div><h2>Mapa topográfico</h2><div id="stageMap" class="mapbox"></div><div class="map-note">Base topográfica con curvas de nivel: OpenTopoMap. Trazado: datos abiertos; usa la señalización física como referencia principal.</div></section>`;setTimeout(()=>makeMap(s.n,'stageMap',false),0)
+ } else if(tab==='mapa'){
+   body.innerHTML=`<div class="map-toolbar"><button id="topoBtn" class="map-chip active">⛰ Topográfico</button><button id="osmBtn" class="map-chip">🛣 Calles</button><button id="poisBtn" class="map-chip">📍 Servicios</button></div><div id="stageMapTall" class="mapbox tall"></div><section class="section"><button class="location-cta full" id="locateOnMap">📍 MOSTRAR MI UBICACIÓN</button><div id="mapStatus" class="route-source">Cargando trazado de alta resolución…</div><div id="poiLegend" class="poi-legend"></div></section>`;setTimeout(async()=>{await makeMap(s.n,'stageMapTall',false,true);document.getElementById('locateOnMap').onclick=locateUser;bindMapToolbar(s.n)},0)
+ } else if(tab==='servicios'){
+   body.innerHTML=`<section class="section"><div class="emergency"><strong>⚠ Emergencias: 112</strong>Número europeo de emergencias, válido también en Francia.</div><h2>Servicios para el peregrino</h2><div class="service-grid">${quickButtons()}</div><div class="info-card"><strong>Servicios sobre el Camino</strong><p>En el mapa, “Servicios” intenta cargar puntos de agua, farmacias, alojamiento, comida, transporte y suministros desde datos abiertos cercanos a la ruta.</p></div></section>`;bindCommon()
+ } else {
+   const rows=s.n===30?STAGE30_SERVICES.filter(x=>x.type==='alojamiento'):[];body.innerHTML=`<section class="section"><h2>Alojamientos</h2><div class="info-card"><strong>Precios</strong><p>No mostraremos precios “de hoy” sin una fuente de disponibilidad en tiempo real. Se distinguirán precios orientativos de tarifas actuales.</p></div>${rows.length?rows.map(serviceCard).join(''):'<div class="empty"><div class="big">🛏</div><p>Los alojamientos se incorporarán desde fuentes verificadas y datos abiertos, sin inventar precios.</p></div>'}</section>`;bindFav()
+ }}
+
+function serviceCard(x){return `<article class="service-card"><div><span class="badge">${esc(x.type)}</span><h3>${esc(x.name)}</h3><p>${esc(x.sub)}</p><p>${esc(x.note)}</p></div><div><div class="price">${esc(x.price)}</div><button class="fav ${favorites.has(x.id)?'on':''}" data-fav="${x.id}">♥</button></div></article>`}
+
+function favoritesView(){currentView='favorites';setActive('favorites');const st=[...favorites].filter(x=>x.startsWith('stage-')).map(x=>STAGES.find(s=>s.n===Number(x.split('-')[1]))).filter(Boolean);app.innerHTML=`<section class="section"><div class="section-head"><h2>Favoritos</h2></div>${st.length?st.map(stageCard).join(''):'<div class="empty"><div class="big">♡</div><p>Guarda etapas y servicios con el corazón.</p></div>'}</section>`;bindStageCards()}
+function myCamino(){currentView='mycamino';setActive('mycamino');const done=[...doneStages].map(n=>STAGES.find(s=>s.n===n)).filter(Boolean);const km=done.reduce((a,s)=>a+s.km,0),pct=Math.round(doneStages.size/STAGES.length*100);app.innerHTML=`<section class="section"><h2>Mi Camino</h2><div class="progress-card"><strong>${doneStages.size} de 33 etapas</strong><div class="progress-track"><div class="progress-bar" style="width:${pct}%"></div></div><div class="meta">${km.toFixed(1)} km registrados de ${kmTotal().toFixed(1)} km</div></div><h2>Marcar etapas realizadas</h2>${STAGES.map(s=>`<div class="my-stage" data-done="${s.n}"><button class="check ${doneStages.has(s.n)?'done':''}">${doneStages.has(s.n)?'✓':''}</button><div><strong>Etapa ${s.n}</strong><div class="meta">${esc(s.from)} → ${esc(s.to)}</div></div></div>`).join('')}</section>`;document.querySelectorAll('[data-done]').forEach(r=>r.onclick=()=>{const n=Number(r.dataset.done);doneStages.has(n)?doneStages.delete(n):doneStages.add(n);save();myCamino()})}
+
+function geoJSONSegments(gj){const out=[];const add=line=>{const seg=(line||[]).map(c=>[Number(c[1]),Number(c[0]),c.length>2?Number(c[2]):null]).filter(c=>Number.isFinite(c[0])&&Number.isFinite(c[1]));if(seg.length>1)out.push(seg)};(gj?.features||[]).forEach(f=>{const g=f?.geometry;if(!g)return;if(g.type==='LineString')add(g.coordinates);else if(g.type==='MultiLineString')(g.coordinates||[]).forEach(add)});return out}
+async function fetchJson(url){const r=await fetch(url,{mode:'cors',cache:'force-cache'});if(!r.ok)throw new Error(String(r.status));return r.json()}
+async function loadOpenPilgrimages(){const jobs=[];if(!remoteRoute)jobs.push(fetchJson(ROUTE_URL).then(x=>remoteRoute=x));if(!remoteWaypoints)jobs.push(fetchJson(WAYPOINTS_URL).then(x=>remoteWaypoints=x));if(!remoteStages)jobs.push(fetchJson(STAGES_URL).then(x=>remoteStages=x));await Promise.allSettled(jobs)}
+function inBox(lat,lon,b){return lat>=b.minLat&&lat<=b.maxLat&&lon>=b.minLon&&lon<=b.maxLon}
+function stageSegmentsFromRemote(n){if(!remoteRoute)return[];const all=geoJSONSegments(remoteRoute);const b=STAGE_BBOX[n];if(!b)return[];return all.map(seg=>seg.filter(p=>inBox(p[0],p[1],b))).filter(seg=>seg.length>1)}
+function localStage(n){const x=(typeof LOCAL_VERIFIED_STAGE_ROUTES!=='undefined')?LOCAL_VERIFIED_STAGE_ROUTES[n]:null;return x&&x.length>1?[x.map(p=>[p[0],p[1],null])]:[]}
+function routeLayers(map,segs){const g=L.featureGroup();segs.forEach(seg=>{L.polyline(seg,{color:'#ffffff',weight:8,opacity:.95,lineCap:'round',lineJoin:'round'}).addTo(g);L.polyline(seg,{color:'#063f86',weight:6,opacity:1,lineCap:'round',lineJoin:'round'}).addTo(g);L.polyline(seg,{color:'#ffc400',weight:2.6,opacity:1,lineCap:'round',lineJoin:'round'}).addTo(g)});g.addTo(map);return g}
+function baseLayers(map){const topo=L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',{maxZoom:17,attribution:'Kartendaten © OpenStreetMap-Mitwirkende, SRTM | Kartendarstellung © OpenTopoMap (CC-BY-SA)'});const osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'});topo.addTo(map);L.control.layers({'Topográfico · curvas de nivel':topo,'Calles · OpenStreetMap':osm},null,{position:'topright',collapsed:true}).addTo(map);L.control.scale({imperial:false,position:'bottomleft'}).addTo(map);return{topo,osm}}
+
+async function makeMap(n,id,fullRoute=false,withPois=false){if(mapInstance){try{mapInstance.remove()}catch{}mapInstance=null}const el=document.getElementById(id);if(!el||typeof L==='undefined'){if(el)el.innerHTML='<div class="empty">El mapa necesita conexión la primera vez.</div>';return}el.innerHTML='';mapInstance=L.map(id,{zoomControl:true,preferCanvas:true});mapLayers=baseLayers(mapInstance);let segs=[];let source='';try{await loadOpenPilgrimages();if(fullRoute&&remoteRoute){segs=geoJSONSegments(remoteRoute);source='Open Pilgrimages · trazado completo de alta resolución'}else if(n){segs=stageSegmentsFromRemote(n);if(segs.length)source='Open Pilgrimages · geometría OSM de alta resolución'} }catch{}
+ if(!segs.length&&n){segs=localStage(n);source=segs.length?'Trazado local verificado (respaldo)':''}
+ if(segs.length){const g=routeLayers(mapInstance,segs);mapLayers.route=g;const b=g.getBounds();if(b.isValid())mapInstance.fitBounds(b,{padding:[18,18],maxZoom:15});const flat=segs.flat();if(n&&flat.length){L.circleMarker(flat[0],{radius:7,color:'#fff',weight:2,fillColor:'#178a3b',fillOpacity:1}).addTo(mapInstance).bindPopup('Inicio: '+STAGES.find(x=>x.n===n).from);L.circleMarker(flat[flat.length-1],{radius:7,color:'#fff',weight:2,fillColor:'#d93636',fillOpacity:1}).addTo(mapInstance).bindPopup('Final: '+STAGES.find(x=>x.n===n).to)}}else{mapInstance.setView([42.9,-4.5],6);toast('Esta etapa aún no tiene trazado detallado cargado.')}
+ const status=document.getElementById('mapStatus');if(status)status.textContent=source||'Trazado detallado pendiente para esta etapa.';
+ if(withPois&&n)await showStagePois(n);setTimeout(()=>mapInstance&&mapInstance.invalidateSize(),120)}
+
+function mapView(){currentView='map';setActive('map');app.innerHTML=`<div class="map-toolbar"><button id="topoBtn" class="map-chip active">⛰ Topográfico</button><button id="osmBtn" class="map-chip">🛣 Calles</button><button id="poisBtn" class="map-chip">📍 Servicios</button></div><div id="mainMap" class="mapbox tall"></div><section class="section"><button class="location-cta full" id="mapLocate">📍 MOSTRAR MI UBICACIÓN</button><p class="map-note">Mapa completo del Camino Francés. OpenTopoMap aporta relieve y curvas de nivel; el trazado de alta resolución se carga desde datos abiertos.</p><div id="poiLegend" class="poi-legend"></div></section>`;setTimeout(async()=>{await makeMap(null,'mainMap',true,false);document.getElementById('mapLocate').onclick=locateUser;bindMapToolbar(null)},0)}
+
+function waypointStageMatch(f,n){const p=f?.properties||{};const idx=Number(p.stageIndex);if(Number.isFinite(idx)&&(idx===n||idx===n-1))return true;if(n===1&&f.geometry?.type==='Point'){const [lon,lat]=f.geometry.coordinates||[];return Number.isFinite(lat)&&Number.isFinite(lon)&&inBox(lat,lon,STAGE_BBOX[1])}return false}
+async function showStagePois(n){if(!remoteWaypoints){try{await loadOpenPilgrimages()}catch{}}if(!remoteWaypoints||!mapInstance){toast('No se pudieron cargar los servicios abiertos.');return}if(mapLayers.pois){mapInstance.removeLayer(mapLayers.pois);mapLayers.pois=null;return}const group=L.layerGroup();let count=0;for(const f of remoteWaypoints.features||[]){if(!waypointStageMatch(f,n))continue;if(f.geometry?.type!=='Point')continue;const [lon,lat]=f.geometry.coordinates||[];if(!Number.isFinite(lat)||!Number.isFinite(lon))continue;const p=f.properties||{},type=p.type||'information',name=p.name?.es||p.name?.en||p.name||TYPE_LABEL[type]||'Servicio';const icon=L.divIcon({className:'poi-div-icon',html:`<span>${TYPE_ICON[type]||'📍'}</span>`,iconSize:[30,30],iconAnchor:[15,15]});L.marker([lat,lon],{icon}).bindPopup(`<strong>${esc(name)}</strong><br>${esc(TYPE_LABEL[type]||type)}${p.kmFromStart!=null?`<br>Km ${Number(p.kmFromStart).toFixed(1)} del Camino`:''}`).addTo(group);count++;if(count>=180)break}group.addTo(mapInstance);mapLayers.pois=group;const legend=document.getElementById('poiLegend');if(legend)legend.innerHTML=`<strong>${count} puntos útiles cargados</strong><span>Agua · Salud · Dormir · Comer · Transporte · Suministros</span>`;toast(count?`${count} servicios cargados`:'No hay servicios cargados para esta etapa')}
+function bindMapToolbar(n){const topo=document.getElementById('topoBtn'),osm=document.getElementById('osmBtn'),pois=document.getElementById('poisBtn');if(topo)topo.onclick=()=>{if(mapLayers.osm&&mapInstance.hasLayer(mapLayers.osm))mapInstance.removeLayer(mapLayers.osm);if(mapLayers.topo&&!mapInstance.hasLayer(mapLayers.topo))mapLayers.topo.addTo(mapInstance);topo.classList.add('active');osm?.classList.remove('active')};if(osm)osm.onclick=()=>{if(mapLayers.topo&&mapInstance.hasLayer(mapLayers.topo))mapInstance.removeLayer(mapLayers.topo);if(mapLayers.osm&&!mapInstance.hasLayer(mapLayers.osm))mapLayers.osm.addTo(mapInstance);osm.classList.add('active');topo?.classList.remove('active')};if(pois)pois.onclick=()=>{if(!n){toast('Abre una etapa para ver servicios asociados.');return}showStagePois(n);pois.classList.toggle('active')}}
+
+function locateUser(){if(!navigator.geolocation){toast('Este dispositivo no ofrece geolocalización.');return}toast('Solicitando GPS de alta precisión…');navigator.geolocation.getCurrentPosition(p=>{const {latitude,longitude,accuracy}=p.coords;if(mapInstance){const me=L.circleMarker([latitude,longitude],{radius:8,color:'#fff',weight:3,fillColor:'#0d6efd',fillOpacity:1}).addTo(mapInstance).bindPopup(`Estás aquí · precisión ±${Math.round(accuracy)} m`).openPopup();L.circle([latitude,longitude],{radius:accuracy,color:'#0d6efd',weight:1,fillOpacity:.06}).addTo(mapInstance);mapInstance.setView([latitude,longitude],15)}else{mapView();setTimeout(()=>locateUser(),650)}toast(`GPS localizado · ±${Math.round(accuracy)} m`)},()=>toast('No se pudo obtener la ubicación. Revisa permisos de ubicación.'),{enableHighAccuracy:true,timeout:12000,maximumAge:15000})}
+function serviceSearch(type){if(type==='emergencia'){location.href='tel:112';return}if(type==='meteorología'){window.open('https://www.aemet.es/','_blank','noopener');return}const q=encodeURIComponent(type+' Camino de Santiago');window.open('https://www.openstreetmap.org/search?query='+q,'_blank','noopener')}
+function bindFav(){document.querySelectorAll('[data-fav]').forEach(b=>b.onclick=e=>{e.stopPropagation();const id=b.dataset.fav;favorites.has(id)?favorites.delete(id):favorites.add(id);save();b.classList.toggle('on',favorites.has(id));toast(favorites.has(id)?'Añadido a favoritos':'Eliminado de favoritos')})}
 function bindStageCards(){document.querySelectorAll('[data-stage]').forEach(c=>{c.onclick=()=>detail(Number(c.dataset.stage));c.onkeydown=e=>{if(e.key==='Enter')c.click()}})}
 function bindCommon(){bindStageCards();document.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>navigate(b.dataset.nav));document.querySelectorAll('[data-service]').forEach(b=>b.onclick=()=>serviceSearch(b.dataset.service));const w=document.getElementById('whereBtn');if(w)w.onclick=locateUser}
 function navigate(v){if(v==='home')home();else if(v==='stages')stages();else if(v==='map')mapView();else if(v==='favorites')favoritesView();else if(v==='mycamino')myCamino()}
+
 document.querySelectorAll('.bottom-nav [data-nav]').forEach(b=>b.onclick=()=>navigate(b.dataset.nav));document.querySelector('.brand').onclick=home;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;const b=document.getElementById('installBtn');b.hidden=false;b.onclick=async()=>{deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;b.hidden=true}});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});

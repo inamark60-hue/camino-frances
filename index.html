@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta name="theme-color" content="#062b65" />
+  <meta name="description" content="Guía móvil gratuita del Camino Francés para Android." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="preconnect" href="https://unpkg.com" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>Camino Francés</title>
+</head>
+<body>
+  <div class="android-shell">
+    <header class="topbar">
+      <div class="brand" data-nav="home" role="button" tabindex="0">
+        <div class="shell-logo">✦</div>
+        <div><strong>CAMINO DE SANTIAGO</strong><span>CAMINO FRANCÉS</span></div>
+      </div>
+      <button class="icon-btn" id="installBtn" aria-label="Instalar aplicación" hidden>⬇</button>
+    </header>
+
+    <main id="app" aria-live="polite"></main>
+
+    <nav class="bottom-nav" aria-label="Navegación principal">
+      <button data-nav="home" class="active"><span>⌂</span>Inicio</button>
+      <button data-nav="stages"><span>👣</span>Etapas</button>
+      <button data-nav="map"><span>🗺</span>Mapa</button>
+      <button data-nav="favorites"><span>♡</span>Favoritos</button>
+      <button data-nav="mycamino"><span>◎</span>Mi Camino</button>
+    </nav>
+  </div>
+
+  <div id="toast" class="toast" role="status"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

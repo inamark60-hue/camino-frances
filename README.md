@@ -1,4 +1,4 @@
-# BUEN CAMINO — V6.7 PRO
+# BUEN CAMINO — V6.8 PRO
 
 ## V6.6.2 · cambio rápido 2D / 3D
 
@@ -69,3 +69,14 @@ Los trazados y servicios no sustituyen la señalización del Camino ni los aviso
 - **👣 VISTA RUTA** orienta la cámara automáticamente en el sentido de marcha de la etapa.
 - **📍 MI POSICIÓN** coloca al peregrino sobre el terreno 3D usando el GPS del teléfono.
 - Se mantiene el cambio directo **🗺 2D ↔ 🏔 3D**.
+
+
+## V6.8 — Flechas de sentido y Servicios 3D reparados
+
+- En 3D se elimina la banda amarilla continua entre puntos.
+- Entre cada par de bolas amarillas aparecen **flechas amarillas pequeñas** orientadas en el sentido de marcha de la etapa.
+- Se conserva una guía azul muy fina para mantener legible el trazado preciso sin tapar el terreno.
+- Al tocar una bola amarilla aparece siempre el panel con **Maps, Earth, OSM, Fotos y Servicios cerca**.
+- **Servicios cerca** abre ahora por encima del mapa 3D (antes podía quedar oculto detrás del relieve).
+- El botón de Servicios usa un listener directo, sin IDs compartidos entre popups.
+- La búsqueda mantiene hoteles/albergues, comida, agua, policía, salud/farmacia, tiendas, WC, cajeros, taxi/transporte y navegación hacia el lugar elegido.

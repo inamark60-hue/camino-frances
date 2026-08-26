@@ -1,12 +1,12 @@
-const CACHE='buen-camino-v67-network-first';
+const CACHE='buen-camino-v68-network-first';
 const CORE=[
   './',
   './index.html',
-  './styles.css?v=67',
-  './app.js?v=67',
+  './styles.css?v=68',
+  './app.js?v=68',
   './data.js',
   './verified-routes.js',
-  './manifest.webmanifest?v=67',
+  './manifest.webmanifest?v=68',
   './buen-camino-logo.png',
   './icon-192.png',
   './icon-512.png',

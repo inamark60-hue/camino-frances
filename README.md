@@ -1,4 +1,4 @@
-# BUEN CAMINO — V5.0 ESTABLE
+# BUEN CAMINO — V5.1 ESTABLE
 
 Versión de estabilización de la guía Android del Camino Francés.
 
@@ -16,3 +16,9 @@ Versión de estabilización de la guía Android del Camino Francés.
 ## Principio de datos
 
 BUEN CAMINO no inventa establecimientos, teléfonos ni rutas. Las demás etapas se irán incorporando y verificando progresivamente.
+
+
+## V5.1 — corrección de mapas y horizontal
+- Las teselas externas ya no pasan por la caché del service worker, evitando bloqueos CORS.
+- OpenTopoMap mantiene respaldo automático a OpenStreetMap.
+- El botón HORIZONTAL intenta pantalla completa + bloqueo landscape; si Android lo impide, usa una rotación interna de respaldo.

@@ -1,4 +1,4 @@
-# BUEN CAMINO — V6.8.1 PRO
+# BUEN CAMINO — V6.9 PRO
 
 ## V6.6.2 · cambio rápido 2D / 3D
 
@@ -88,3 +88,14 @@ Los trazados y servicios no sustituyen la señalización del Camino ni los aviso
 - La orientación se calcula usando exactamente las coordenadas de esas dos bolas visibles.
 - El icono base de la flecha apunta ahora al norte; la rotación cartográfica usa 0°=N, 90°=E, 180°=S y 270°=O.
 - Se mantienen Maps, Earth, OSM, Fotos y Servicios cerca al pulsar una bola amarilla.
+
+
+## V6.9 — Consejos del peregrino y rutas favoritas
+
+- Botón **❓ DUDAS · CONSEJOS DEL PEREGRINO** dentro de la pantalla Resumen de cada etapa.
+- Consejos ampliados sobre ampollas, rozaduras, botiquín, luz/pilas, radio de respaldo, meteorología, comunicación y equipo.
+- Recomendaciones de ampollas prudentes: proteger, no reventar deliberadamente, no retirar la piel y vigilar signos de infección.
+- Botón **♡ / ♥ Favorito** directamente en las tarjetas de las rutas.
+- Botón **⬇** directamente en cada ruta para abrir descargas.
+- Pantalla **Favoritos** rediseñada para rutas guardadas, con **GPS / Wikiloc** y acceso a GPX, GPX + servicios, KML / Earth y TCX.
+- Se mantienen mapa 2D/3D, flechas de dirección, servicios cercanos y el resto de funciones anteriores.

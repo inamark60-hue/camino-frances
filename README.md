@@ -1,6 +1,6 @@
-# BUEN CAMINO — V6.6.1 PRO
+# BUEN CAMINO — V6.6.2 PRO
 
-## V6.6.1 · cambio rápido 2D / 3D
+## V6.6.2 · cambio rápido 2D / 3D
 
 - Nuevo botón flotante **🗺 2D** siempre visible dentro del mapa 3D.
 - Un toque cierra el relieve 3D y vuelve inmediatamente al mapa 2D de la misma etapa.
@@ -51,3 +51,11 @@ La app se mantiene sin APIs de pago. Los mapas y datos abiertos pueden depender 
 Los trazados y servicios no sustituyen la señalización del Camino ni los avisos oficiales sobre cierres, obras o condiciones meteorológicas.
 
 - Donación: se indica en letra pequeña que la aportación se destinará a **Save the Children**, con enlace directo a su página oficial de donaciones.
+
+
+## V6.6.2
+
+- Corrección del bloqueo de caché de la PWA en Android.
+- `app.js`, `styles.css` y manifest llevan versión única `662`.
+- Service worker con estrategia **network-first** para HTML/JS/CSS/manifest.
+- Mantiene el selector directo **2D ↔ 3D**.

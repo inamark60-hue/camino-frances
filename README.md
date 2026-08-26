@@ -1,3 +1,16 @@
+# BUEN CAMINO — V6.6 PRO
+
+## Novedad principal: mapa 3D
+
+- Botón **🏔 3D** en Resumen, Mapa, Mapa grande y Mapa por etapa.
+- Relieve tridimensional real con **MapLibre GL JS** y datos de elevación **Mapterhorn**, sin clave API.
+- Base topográfica OpenTopoMap con curvas de nivel, con cambio a calles OpenStreetMap.
+- Ruta amarilla drapeada sobre el terreno, puntos de ruta interactivos y servicios opcionales en 3D.
+- Gestos táctiles: pellizco para zoom, dos dedos para inclinar/girar y arrastre para mover.
+- Botones Norte, relieve x1.2/x1.6/x2.0, Ruta ON/OFF y Servicios.
+- El mapa 2D sigue siendo el modo estable de respaldo si WebGL, la red o el relieve 3D no están disponibles.
+- Todo sin APIs de pago.
+
 # BUEN CAMINO — V6.5.1 PRO
 
 Guía PWA gratuita del Camino Francés con 33 etapas.

@@ -100,3 +100,25 @@
 
 /* V6.5.1 · destino solidario de las donaciones */
 .donation-charity-note{display:block;margin-top:10px;color:#6a7583;font-size:9px;line-height:1.4}.donation-charity-note a{color:#0867c5;font-weight:900;text-decoration:underline;text-underline-offset:2px}
+
+/* V6.6 PRO · mapa 3D */
+.terrain-chip,.terrain-main,.terrain-top-btn{background:#17345f!important;color:#fff!important;border-color:#17345f!important}
+.terrain3d-open{overflow:hidden!important}
+.terrain3d-overlay{position:fixed;inset:0;z-index:9000;background:#eef3f8;display:flex;flex-direction:column}
+.terrain3d-top{flex:0 0 auto;min-height:54px;background:#062b65;color:#fff;display:flex;align-items:center;gap:6px;padding:6px max(6px,env(safe-area-inset-right)) 6px max(6px,env(safe-area-inset-left));overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+.terrain3d-top::-webkit-scrollbar{display:none}
+.terrain3d-title{display:flex;flex-direction:column;min-width:160px;margin-right:auto;line-height:1.05}
+.terrain3d-title b{font-size:12px;letter-spacing:.04em}.terrain3d-title span{font-size:8px;opacity:.82;margin-top:3px;max-width:230px;overflow:hidden;text-overflow:ellipsis}
+.terrain3d-top button{flex:0 0 auto;border:0;border-radius:9px;background:#fff;color:#15345f;min-height:38px;padding:7px 9px;font-weight:950;font-size:10px}
+.terrain3d-top button:last-child{background:#e63535;color:#fff;min-width:40px;font-size:17px;padding:5px 10px}
+.terrain3d-canvas{position:relative;flex:1;min-height:0;background:#dbe5ef}
+.terrain3d-canvas canvas{touch-action:none}
+.terrain3d-loading{position:absolute;z-index:5;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;text-align:center;padding:30px;background:linear-gradient(180deg,#edf5fb,#dce9f5);color:#16375f}
+.terrain3d-loading strong{font-size:17px}.terrain3d-loading span{font-size:10px;max-width:320px;line-height:1.45;color:#5c6f82}
+.terrain3d-help{position:absolute;left:50%;bottom:max(8px,env(safe-area-inset-bottom));z-index:9002;transform:translateX(-50%);background:#082d60dd;color:#fff;border:1px solid #ffffff55;border-radius:999px;padding:7px 11px;font-size:9px;font-weight:800;pointer-events:none;white-space:nowrap}
+.terrain-popup{display:grid;gap:6px;color:#15345f;min-width:190px}.terrain-popup b{font-size:12px}.terrain-popup small{font-size:9px;color:#5c6d80}.terrain-popup>div{display:flex;flex-wrap:wrap;gap:5px}.terrain-popup a,.terrain-popup button{border:0;border-radius:8px;background:#edf4ff;color:#0758aa;text-decoration:none;padding:7px 8px;font-size:9px;font-weight:900}.terrain-popup button{background:#fff0a8;color:#15345f}
+.maplibregl-ctrl-bottom-left{bottom:30px!important}.maplibregl-ctrl-bottom-right{bottom:30px!important}
+@media(max-width:500px){.terrain3d-title{min-width:122px}.terrain3d-title span{max-width:140px}.terrain3d-top button{font-size:9px;padding:6px 7px}.terrain3d-help{font-size:8px;max-width:92%;overflow:hidden;text-overflow:ellipsis}}
+@media(orientation:landscape){.terrain3d-top{min-height:46px}.terrain3d-help{bottom:6px}.terrain3d-title{min-width:180px}}
+.terrain3d-overlay.force-landscape{inset:auto;left:50%;top:50%;width:100dvh;height:100vw;transform:translate(-50%,-50%) rotate(90deg);transform-origin:center}
+.terrain3d-overlay.force-landscape .terrain3d-top{min-height:46px}

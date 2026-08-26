@@ -1,4 +1,4 @@
-# BUEN CAMINO — V6.9 PRO
+# BUEN CAMINO — V7.0 PRO
 
 ## V6.6.2 · cambio rápido 2D / 3D
 
@@ -99,3 +99,19 @@ Los trazados y servicios no sustituyen la señalización del Camino ni los aviso
 - Botón **⬇** directamente en cada ruta para abrir descargas.
 - Pantalla **Favoritos** rediseñada para rutas guardadas, con **GPS / Wikiloc** y acceso a GPX, GPX + servicios, KML / Earth y TCX.
 - Se mantienen mapa 2D/3D, flechas de dirección, servicios cercanos y el resto de funciones anteriores.
+
+
+## V7.0 — Albergues y menú del peregrino
+
+- En **Servicios** aparecen en primer lugar dos accesos especiales:
+  - **🥾 ALBERGUES DEL CAMINO**
+  - **🍲 MENÚ PEREGRINO**
+- En **Alojamientos**, la primera vista abre directamente los albergues/refugios del Camino.
+- Los albergues se muestran en **orden de marcha por km** y tienen botón **Ver en mapa**.
+- El mapa usa un icono especial 🥾 para esta vista.
+- **Menú peregrino** distingue entre:
+  - **✓ Menú peregrino indicado** cuando los datos lo dicen expresamente.
+  - Restaurantes de la etapa donde conviene **confirmar** si lo ofrecen.
+- Cada restaurante no verificado tiene un botón **🍲 Consultar menú peregrino**.
+- El botón especial existe en las 33 etapas.
+- No se marca como “menú peregrino” un establecimiento si no hay evidencia en los datos disponibles.

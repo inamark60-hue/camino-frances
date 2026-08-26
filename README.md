@@ -1,24 +1,25 @@
-# BUEN CAMINO — V5.1 ESTABLE
+# BUEN CAMINO — V5.3 ESTABLE
 
-Versión de estabilización de la guía Android del Camino Francés.
+Versión centrada en hacer el mapa más cómodo y preciso en Android sin usar APIs de pago.
 
-## Qué cambia
+## Mejoras V5.3
+- Zoom con pellizco de dos dedos más sensible.
+- Perfil de desnivel flotante, más pequeño, superpuesto al mapa y con botón PERFIL para mostrar/ocultar.
+- En horizontal el perfil queda en la esquina inferior izquierda y ocupa como máximo aproximadamente media anchura.
+- Botón de cartografía corregido: alterna claramente entre **CALLES** (OpenStreetMap) y **TOPO** (OpenTopoMap).
+- Las teselas visibles se conservan mientras se desplaza el mapa para reducir recargas; se añaden preconexiones a los servidores gratuitos de mapas.
+- 15 % menos de puntos amarillos visibles que V5.1, manteniendo la geometría completa de la ruta.
+- Al tocar un punto amarillo se mantiene la relación con el perfil y se intenta mostrar una **foto cercana de Wikimedia Commons**; si no hay foto, ofrece búsqueda de fotos cercanas.
+- La etapa 1 intenta mejorar en segundo plano a trazado de alta resolución de **Open Pilgrimages / OpenStreetMap**. Si no hay conexión, continúa usando el trazado local incluido.
+- El trazado de alta resolución no bloquea la carga del mapa.
 
-- Se elimina la dependencia de Leaflet/unpkg: el mapa usa un motor cartográfico propio en JavaScript.
-- El trazado de la etapa 1 está dentro de la aplicación y se dibuja aunque fallen datos externos.
-- OpenTopoMap se usa como fondo topográfico; si una tesela falla, intenta OpenStreetMap como respaldo.
-- Modo MAPA GRANDE/HORIZONTAL independiente del bloqueo de giro de Android: la vista se rota internamente cuando hace falta.
-- Perfil de desnivel compacto y sincronizado en ambos sentidos con los puntos amarillos de la ruta.
-- Los puntos amarillos aumentan de tamaño al hacer zoom.
-- Servicios y Alojamientos de la etapa 1 disponen de una base local verificada con teléfonos, webs, direcciones y enlaces de mapa; no dependen de Overpass para mostrar los datos esenciales.
-- Se mantienen DUDAS, Primeros Auxilios, 112, AEMET, GPS, favoritos y Mi Camino.
+## Fuentes cartográficas
+- OpenTopoMap / OpenStreetMap.
+- Trazado de alta resolución: Open Pilgrimages, datos © OpenStreetMap contributors, ODbL.
+- Fotos cercanas: Wikimedia Commons; la licencia concreta se consulta en la ficha de cada fotografía.
 
-## Principio de datos
+## Coste
+Solo servicios gratuitos y sin claves de APIs de pago.
 
-BUEN CAMINO no inventa establecimientos, teléfonos ni rutas. Las demás etapas se irán incorporando y verificando progresivamente.
-
-
-## V5.1 — corrección de mapas y horizontal
-- Las teselas externas ya no pasan por la caché del service worker, evitando bloqueos CORS.
-- OpenTopoMap mantiene respaldo automático a OpenStreetMap.
-- El botón HORIZONTAL intenta pantalla completa + bloqueo landscape; si Android lo impide, usa una rotación interna de respaldo.
+## Seguridad
+La app sirve como ayuda al peregrino. No sustituye la señalización oficial, avisos meteorológicos, cierres de ruta ni indicaciones de emergencias.

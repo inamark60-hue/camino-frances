@@ -7,3 +7,57 @@
 .doubts-backdrop{position:fixed;inset:0;background:#001a3d99;z-index:6000;display:flex;align-items:flex-end}.doubts-backdrop[hidden]{display:none}.doubts-sheet{width:min(100%,500px);margin:0 auto;background:#fff;border-radius:22px 22px 0 0;max-height:82dvh;overflow:auto}.doubts-head{position:sticky;top:0;background:#fff;display:flex;justify-content:space-between;padding:15px;border-bottom:1px solid #eee}.doubts-head span{font-size:9px;color:#758196;font-weight:900}.doubts-head h2{font-size:17px;margin:3px 0}.doubts-head button{border:0;background:#eef2f5;border-radius:50%;width:36px;height:36px;font-size:22px}.doubts-body{padding:14px}.doubt-card{background:#f7f9fc;border:1px solid #e2e8ef;border-radius:13px;padding:12px;margin-bottom:9px}.doubt-card strong{display:block;margin-bottom:5px}.doubt-card p{font-size:12px;line-height:1.45;color:#526075;margin:0}.danger-links{display:grid;grid-template-columns:1fr 1fr;gap:8px}.danger-links a{display:block;text-decoration:none;text-align:center;border-radius:11px;padding:11px;font-weight:950}.danger-links .aid{background:#eef4ff;color:#0758aa}.danger-links .emg{background:#e6322d;color:#fff}
 @media(max-width:370px){.service-grid{grid-template-columns:repeat(2,1fr)}.detail-head h1{font-size:22px}.stat-grid{grid-template-columns:repeat(2,1fr)}}
 .bc-markers{pointer-events:none}.bc-marker{pointer-events:auto}.focus-overlay.force-landscape{width:100vh;width:100dvh}
+
+/* ===== V5.2 · mapa táctil, perfil flotante y capas fiables ===== */
+.bc-map{touch-action:none;overscroll-behavior:contain}
+.bc-tiles,.bc-overlay,.bc-markers{will-change:transform}
+.bc-tile{contain:layout paint;image-rendering:auto}
+.bc-layer{width:auto;min-width:82px;padding:0 10px;font-size:11px;font-weight:950;letter-spacing:.2px;white-space:nowrap}
+.bc-layer.streets{background:#eaf3ff;color:#0758aa}
+.map-workspace{display:block;min-height:calc(100dvh - 210px)}
+.map-shell{height:calc(100dvh - 210px);min-height:430px;position:relative}
+.map-shell .bc-map{height:100%;min-height:430px;border-radius:0}
+.map-profile-overlay,.focus-profile-overlay{position:absolute;left:10px;bottom:10px;width:min(70%,310px);height:106px;background:#fffffff2;border:1px solid #b9c8d8;border-radius:12px;box-shadow:0 3px 16px #001a4f33;z-index:20;display:flex;flex-direction:column;overflow:hidden;backdrop-filter:blur(2px)}
+.map-profile-overlay.profile-hidden,.focus-profile-overlay.profile-hidden{display:none!important}
+.map-profile-overlay .elevation-head,.focus-profile-overlay .elevation-head{height:30px;min-height:30px;padding:3px 7px;background:#ffffffee}
+.map-profile-overlay .elevation-chart,.focus-profile-overlay .elevation-chart{height:74px;min-height:0}
+.map-profile-overlay .elevation-svg,.focus-profile-overlay .elevation-svg{height:74px;min-height:0}
+.profile-close{width:28px;height:25px;border:0;border-radius:7px;background:#edf2f8;color:#16375f;font-size:18px;font-weight:900;display:grid;place-items:center}
+.map-shell .bc-scale,.focus-map .bc-scale{left:50%;right:auto;bottom:8px;transform:translateX(-50%)}
+.focus-overlay{background:#eef3f8}
+.focus-top{overflow-x:auto;white-space:nowrap;scrollbar-width:none;gap:5px;flex:0 0 52px}
+.focus-top::-webkit-scrollbar{display:none}.focus-top strong{flex:0 0 auto;margin-right:4px;font-size:12px}.focus-top button{flex:0 0 auto;padding:8px 9px;font-size:10px}
+.focus-body{display:block;position:relative;flex:1;min-height:0}
+.focus-map{position:absolute;inset:0;min-height:0}
+.focus-map .bc-map{height:100%;border:0;border-radius:0}
+.focus-profile-overlay{width:min(72%,330px);height:108px}
+.focus-overlay.force-landscape{inset:auto;left:50%;top:50%;width:100dvh;height:100vw;transform:translate(-50%,-50%) rotate(90deg);transform-origin:center}
+.focus-overlay.force-landscape .focus-body{display:block;position:relative}
+.focus-overlay.force-landscape .focus-map{position:absolute;inset:0}
+.focus-overlay.force-landscape .focus-profile-overlay{width:min(48%,420px);height:112px;left:12px;bottom:12px;border-left:1px solid #b9c8d8;border-top:1px solid #b9c8d8}
+.focus-overlay.force-landscape .focus-top{height:46px;flex-basis:46px}
+@media (orientation:landscape){
+ .focus-overlay:not(.force-landscape) .focus-body{display:block;position:relative}
+ .focus-overlay:not(.force-landscape) .focus-map{position:absolute;inset:0}
+ .focus-overlay:not(.force-landscape) .focus-profile-overlay{width:min(48%,420px);height:112px;left:12px;bottom:12px;border-left:1px solid #b9c8d8;border-top:1px solid #b9c8d8}
+ .map-profile-overlay{width:min(48%,420px);height:108px}
+}
+@media (max-width:430px){.focus-top strong{display:none}.focus-top{padding-left:5px;padding-right:5px}}
+
+
+/* ===== V5.3 · visibilidad, fotos y perfil compacto ===== */
+.bc-layer{width:auto!important;min-width:78px!important;padding:0 9px!important;font-size:12px!important;line-height:1!important;white-space:nowrap}
+.map-profile-overlay,.focus-profile-overlay{height:90px!important;width:min(64%,290px)!important}
+.map-profile-overlay .elevation-head,.focus-profile-overlay .elevation-head{height:26px!important;min-height:26px!important}
+.map-profile-overlay .elevation-chart,.focus-profile-overlay .elevation-chart,.map-profile-overlay .elevation-svg,.focus-profile-overlay .elevation-svg{height:62px!important;min-height:0!important}
+.focus-overlay.force-landscape .focus-profile-overlay{width:min(48%,410px)!important;height:92px!important;left:10px!important;bottom:10px!important}
+@media (orientation:landscape){
+ .focus-overlay:not(.force-landscape) .focus-profile-overlay{width:min(48%,410px)!important;height:92px!important;left:10px!important;bottom:10px!important}
+ .map-profile-overlay{width:min(48%,410px)!important;height:90px!important}
+}
+.route-photo{margin:7px -2px 2px;min-height:0}
+.route-photo-link{display:block;text-decoration:none;color:#17345f;font-weight:850;font-size:9px}
+.route-photo-link img{display:block;width:100%;height:92px;object-fit:cover;border-radius:9px;border:1px solid #d6dee8;background:#eef3f8;margin-bottom:4px}
+.photo-loading,.photo-nearby-link{display:block;padding:7px 5px;color:#5d6b7c;font-size:9px;text-decoration:none}
+.route-popup{max-width:270px}
+.popup-actions{grid-template-columns:1fr 1fr}

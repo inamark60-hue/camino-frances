@@ -1,18 +1,12 @@
-# BUEN CAMINO — V6.0 · 33 ETAPAS
+# BUEN CAMINO — V6.1 PRO
 
-Versión que extiende el esquema profesional a las 33 etapas del Camino Francés.
+Corrección de las 33 etapas.
 
-## Novedades
-- Las 33 etapas intentan cargar trazado de alta resolución desde Open Pilgrimages / OpenStreetMap.
-- Servicios por etapa desde waypoints abiertos, con datos locales verificados como prioridad.
-- 👍 Me gusta por etapa, guardado en el teléfono.
-- ↗ Compartir por etapa mediante Android Web Share o copia de enlace.
-- 💛 Donación al creador `inatiusmarki` preparada; falta configurar la plataforma/enlace de pago exacto.
-- Selector de las 33 etapas en el mapa general.
-- Mantiene mapa topográfico, perfil cuando existen datos altimétricos, GPS, DUDAS, primeros auxilios, AEMET y modo horizontal.
+- Se corrige el fallo de V6.0 que impedía procesar las rutas de las etapas 2–33.
+- Cada etapa carga y encuadra su tramo correspondiente del Camino Francés.
+- La etapa 1 mantiene su trazado local verificado.
+- Las demás etapas usan la geometría de Open Pilgrimages / OpenStreetMap y se ajustan al tramo concreto.
+- Se corrigen los límites de Terradillos → El Burgo Ranero y El Burgo Ranero → Mansilla para conservar el esquema de 33 etapas de BUEN CAMINO.
+- Se mantienen Me gusta, Compartir, Donación, Servicios, Alojamientos, GPS, Perfil, fotos y mapa topográfico.
 
-## Datos abiertos
-Contiene/incluye información de Open Pilgrimages bajo ODbL y datos © OpenStreetMap contributors. Los teléfonos, horarios y webs dependen de la disponibilidad en las fuentes y deben verificarse antes de viajar.
-
-## Coste
-Sin APIs de pago.
+Datos de ruta: Open Pilgrimages / OpenStreetMap (ODbL).

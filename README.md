@@ -1,4 +1,4 @@
-# BUEN CAMINO — V6.8 PRO
+# BUEN CAMINO — V6.8.1 PRO
 
 ## V6.6.2 · cambio rápido 2D / 3D
 
@@ -80,3 +80,11 @@ Los trazados y servicios no sustituyen la señalización del Camino ni los aviso
 - **Servicios cerca** abre ahora por encima del mapa 3D (antes podía quedar oculto detrás del relieve).
 - El botón de Servicios usa un listener directo, sin IDs compartidos entre popups.
 - La búsqueda mantiene hoteles/albergues, comida, agua, policía, salud/farmacia, tiendas, WC, cajeros, taxi/transporte y navegación hacia el lugar elegido.
+
+
+## V6.8.1 — Dirección de flechas corregida
+
+- Cada flecha amarilla se orienta **desde la bola precedente hacia la bola siguiente**.
+- La orientación se calcula usando exactamente las coordenadas de esas dos bolas visibles.
+- El icono base de la flecha apunta ahora al norte; la rotación cartográfica usa 0°=N, 90°=E, 180°=S y 270°=O.
+- Se mantienen Maps, Earth, OSM, Fotos y Servicios cerca al pulsar una bola amarilla.

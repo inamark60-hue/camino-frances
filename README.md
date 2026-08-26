@@ -1,13 +1,21 @@
-# BUEN CAMINO — V6.3 PRO
+# BUEN CAMINO — V6.4 PRO
 
-Actualización centrada en dos mejoras solicitadas:
+Guía PWA gratuita del Camino Francés con 33 etapas.
 
-- Inicio más directo: se elimina el gran panel/logo de bienvenida para entrar enseguida en las etapas.
-- Fichas de servicios ampliadas: teléfono, segundo teléfono, web, email, horario, dirección, coordenadas, km del Camino y datos adicionales disponibles (camas, habitaciones, cocina, operador, internet, accesibilidad, reserva o tarifa).
-- Resumen por categoría indicando cuántos resultados tienen teléfono, web, horario y dirección.
-- Enlaces directos a llamada, sitio web, email, ubicación, ruta a pie, Google Earth y ficha OpenStreetMap.
-- Se mantienen las 33 etapas, mapas, perfil, servicios, comunidad local, fotos, compartir y funciones anteriores.
+## V6.4
 
-Los datos de establecimientos proceden de fuentes abiertas y pueden estar incompletos o cambiar. BUEN CAMINO no inventa teléfonos, horarios ni precios.
+- Servicios del mapa agrupados automáticamente para evitar saturación de iconos.
+- Filtros rápidos sobre el mapa: todos, dormir, comer, agua y salud/farmacia.
+- Servicios y alojamientos ordenados por kilómetro del Camino.
+- Marca `✓ Datos completos` cuando existe teléfono + web + ubicación.
+- Cuando faltan datos, botón para buscar información pública del establecimiento.
+- Panel meteorológico compacto dentro de cada etapa con temperatura, probabilidad de lluvia, viento y rachas; enlace a AEMET para la información oficial y avisos.
+- Descarga de cada etapa en **GPX**, **GPX + servicios**, **KML** y **TCX**.
+- GPX pensado para GPS y para importación en Wikiloc.
+- Se mantienen mapas topográficos, rutas precisas, perfil de desnivel interactivo, GPS, fotos, Me gusta, visitas, comentarios, WhatsApp, Favoritos, Mi Camino, DUDAS y primeros auxilios.
 
-Nota: Android/Chrome puede mostrar durante una fracción de segundo su propia pantalla de arranque de la PWA instalada. Esa pantalla del sistema no puede eliminarse por completo desde la web; la pantalla grande interna de BUEN CAMINO sí se ha retirado.
+## Datos y coste
+
+La app se mantiene sin APIs de pago. Los mapas y datos abiertos pueden depender de conexión. Los datos meteorológicos rápidos se muestran como ayuda; para avisos y predicción oficial se enlaza AEMET.
+
+Los trazados y servicios no sustituyen la señalización del Camino ni los avisos oficiales sobre cierres, obras o condiciones meteorológicas.

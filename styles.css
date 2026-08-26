@@ -276,3 +276,12 @@
  .bc-center-route{min-width:68px;height:39px;padding:4px 8px}
  .bc-center-route span{font-size:8px}
 }
+
+
+/* V7.5 · guía de uso integrada */
+.app-guide-main{width:100%;margin-top:8px;border:1px solid #ffffff55;border-radius:13px;background:#ffc400;color:#062b65;padding:11px 10px;min-height:46px;font-weight:950;letter-spacing:.15px;cursor:pointer}
+.guide-intro{background:#eef5ff;border:1px solid #c9dbef;border-radius:14px;padding:12px;margin-bottom:10px;color:#15345f}
+.guide-intro b{display:block;font-size:14px;margin-bottom:5px}.guide-intro p,.guide-card p,.guide-flow p,.guide-warning p{font-size:12px;line-height:1.48;margin:0;color:#526075}
+.guide-card{background:#fff;border:1px solid #e0e7ef;border-radius:13px;padding:12px;margin-bottom:8px}.guide-card strong{display:block;color:#17345f;margin-bottom:5px;font-size:12px}
+.guide-flow{background:#f6f9fd;border:1px solid #dbe4ef;border-radius:14px;padding:12px;margin-top:12px}.guide-flow>b{display:block;color:#15345f;margin-bottom:7px}.guide-flow p+p{margin-top:6px}
+.guide-warning{background:#fff7dd;border:1px solid #ead071;border-radius:14px;padding:12px;margin-top:10px}.guide-warning>b{display:block;color:#6b5711;margin-bottom:5px}

@@ -1,4 +1,12 @@
-# BUEN CAMINO — V7.4 PRO
+# BUEN CAMINO — V7.5 PRO
+
+## V7.5 — Guía de uso integrada
+
+- Nuevo botón **📖 GUÍA APP · CÓMO USAR BUEN CAMINO** en la pantalla de Inicio.
+- La guía se abre dentro de la propia PWA y explica las 33 etapas, mapas 2D/3D, GPS, puntos amarillos, perfil, servicios, alojamientos, Menú peregrino, meteorología, descargas GPS, Earth/Wikiloc, Favoritos, Mi Camino, comunidad, compartir, consejos e instalación.
+- Incluye un flujo recomendado antes, durante y después de cada etapa y un aviso de seguridad.
+- Se conservan todas las funciones de V7.4 y las **33 etapas**.
+- Recursos y service worker actualizados a **V7.5 PRO** para renovar correctamente la caché PWA.
 
 ## V7.4 — Creador y donación solidaria
 

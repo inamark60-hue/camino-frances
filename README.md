@@ -1,4 +1,11 @@
-# BUEN CAMINO — V7.3 PRO
+# BUEN CAMINO — V7.4 PRO
+
+## V7.4 — Creador y donación solidaria
+
+- Creador mostrado como **Ignacio Marquiegui**.
+- La donación abre directamente la página oficial de **Save the Children España**.
+- BUEN CAMINO no procesa, gestiona ni recibe las donaciones.
+- Recursos y service worker actualizados a **V7.4 PRO** para renovar correctamente la caché PWA.
 
 ## V7.3 — Correcciones de coherencia y PWA
 
@@ -61,7 +68,7 @@ La app se mantiene sin APIs de pago. Los mapas y datos abiertos pueden depender 
 
 Los trazados y servicios no sustituyen la señalización del Camino ni los avisos oficiales sobre cierres, obras o condiciones meteorológicas.
 
-- Donación: se indica en letra pequeña que la aportación se destinará a **Save the Children**, con enlace directo a su página oficial de donaciones.
+- Donación: enlace directo a la página oficial de **Save the Children España**; BUEN CAMINO no gestiona ni recibe la aportación.
 
 
 ## V6.6.2

@@ -1,4 +1,11 @@
-# BUEN CAMINO — V6.6 PRO
+# BUEN CAMINO — V6.6.1 PRO
+
+## V6.6.1 · cambio rápido 2D / 3D
+
+- Nuevo botón flotante **🗺 2D** siempre visible dentro del mapa 3D.
+- Un toque cierra el relieve 3D y vuelve inmediatamente al mapa 2D de la misma etapa.
+- En el mapa 2D se mantiene el botón **🏔 3D**, formando un cambio directo 2D ↔ 3D.
+- El botón 2D permanece visible también en horizontal, sin depender del botón ✕.
 
 ## Novedad principal: mapa 3D
 

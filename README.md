@@ -1,4 +1,4 @@
-# BUEN CAMINO — V6.6.2 PRO
+# BUEN CAMINO — V6.7 PRO
 
 ## V6.6.2 · cambio rápido 2D / 3D
 
@@ -59,3 +59,13 @@ Los trazados y servicios no sustituyen la señalización del Camino ni los aviso
 - `app.js`, `styles.css` y manifest llevan versión única `662`.
 - Service worker con estrategia **network-first** para HTML/JS/CSS/manifest.
 - Mantiene el selector directo **2D ↔ 3D**.
+
+
+## V6.7 — Navegación 3D refinada
+
+- Menos puntos amarillos visibles en 3D para leer mejor el trazado.
+- Línea de ruta más clara sobre el relieve.
+- Cabecera 3D más compacta.
+- **👣 VISTA RUTA** orienta la cámara automáticamente en el sentido de marcha de la etapa.
+- **📍 MI POSICIÓN** coloca al peregrino sobre el terreno 3D usando el GPS del teléfono.
+- Se mantiene el cambio directo **🗺 2D ↔ 🏔 3D**.

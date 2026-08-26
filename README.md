@@ -1,15 +1,5 @@
 # BUEN CAMINO — V7.2 PRO
 
-## V7.2 PRO · GPS, centrado de ruta y servicios oficiales
-
-- Eliminado el botón global **DUDAS** de la cabecera; se conserva **DUDAS PEREGRINO** dentro del Resumen de cada etapa.
-- Todos los mapas 2D incorporan **◎ Centrar ruta** y **📍 Mi posición GPS**; la posición del peregrino queda visible y se actualiza mientras el mapa está abierto.
-- El mapa 3D añade **◎ CENTRAR RUTA** y mantiene **📍 MI POSICIÓN**, ahora con actualización GPS continua mientras la vista 3D está abierta.
-- Servicios incluye acceso prioritario a **Albergues del Camino**, **Credencial / Compostela** y **Menú peregrino**.
-- Los albergues solo muestran etiqueta **oficial / red pública** cuando la fuente permite identificar esa gestión; se añade acceso al listado oficial de la Red Pública de Albergues de Galicia.
-- Se muestran logo/icono web cuando existe, indicación de credencial requerida en red pública identificada y **sello de credencial** cuando el dato aparece expresamente.
-- Panel de información oficial con enlaces a Credencial, Compostela y Oficina de Acogida al Peregrino.
-
 ## V6.6.2 · cambio rápido 2D / 3D
 
 - Nuevo botón flotante **🗺 2D** siempre visible dentro del mapa 3D.
@@ -140,3 +130,16 @@ Los trazados y servicios no sustituyen la señalización del Camino ni los aviso
 - Las 33 tarjetas de etapa incorporan botones directos **🌍 EARTH · 🟢 WIKILOC · ⬇ GPS**.
 - El botón GPS mantiene las descargas **GPX, GPX + servicios, KML y TCX**.
 - Wikiloc abre la búsqueda de la etapa por origen/destino; el GPX de BUEN CAMINO puede importarse para conservar el trazado descargado.
+
+
+## V7.2 — Cabecera limpia, albergues/credencial y centrar ruta
+
+- El botón superior **DUDAS** se elimina de las etapas y de sus Resúmenes.
+- Se conserva únicamente **❓ DUDAS · CONSEJOS DEL PEREGRINO** dentro del Resumen de cada etapa.
+- En Inicio se mantiene el acceso **🌍 EARTH**, sin mostrar DUDAS.
+- La vista **🐚 ALBERGUES DEL CAMINO** coloca primero los albergues que los datos permiten identificar como públicos o institucionales.
+- Las fichas de albergue incorporan distintivo 🐚, logo/favicon de su web cuando existe y estado del **sello de credencial**.
+- Si el sello no consta en datos abiertos se muestra claramente **“confirmar en recepción”**; no se inventa disponibilidad.
+- Se recuerda que los sellos se conservan en la credencial y que la **Compostela se tramita en Santiago**.
+- Todos los mapas 2D incorporan un botón flotante **🎯 RUTA** para volver a encuadrar el recorrido después de mover o ampliar el mapa.
+- El mapa 3D incorpora **🎯 CENTRAR** con el mismo comportamiento.

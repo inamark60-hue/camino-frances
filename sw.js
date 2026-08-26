@@ -1,12 +1,12 @@
-const CACHE='buen-camino-v72-network-first';
+const CACHE='buen-camino-v73-network-first';
 const CORE=[
   './',
   './index.html',
-  './styles.css?v=72',
-  './app.js?v=72',
-  './data.js',
-  './verified-routes.js',
-  './manifest.webmanifest?v=72',
+  './styles.css?v=73',
+  './app.js?v=73',
+  './data.js?v=73',
+  './verified-routes.js?v=73',
+  './manifest.webmanifest?v=73',
   './buen-camino-logo.png',
   './icon-192.png',
   './icon-512.png',
@@ -24,7 +24,7 @@ self.addEventListener('install',event=>{
 self.addEventListener('activate',event=>{
   event.waitUntil(
     caches.keys()
-      .then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))
+      .then(keys=>Promise.all(keys.filter(k=>k.startsWith('buen-camino-')&&k!==CACHE).map(k=>caches.delete(k))))
       .then(()=>self.clients.claim())
   );
 });

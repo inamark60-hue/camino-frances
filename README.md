@@ -1,4 +1,15 @@
-# BUEN CAMINO — V7.2 PRO
+# BUEN CAMINO — V7.3 PRO
+
+## V7.3 — Correcciones de coherencia y PWA
+
+- Se mantiene íntegra la aplicación V7.2 y sus **33 etapas**.
+- Versión visible, manifest, recursos y service worker unificados en **V7.3 PRO**.
+- `data.js` y `verified-routes.js` llevan también versión de caché para evitar mezclar archivos de distintas versiones en Android/PWA.
+- La limpieza de caché elimina únicamente cachés antiguas de **BUEN CAMINO** y no otras cachés del mismo origen.
+- Eliminados de `data.js` los antiguos servicios demostrativos de la etapa 30 y coordenadas heredadas que no estaban conectadas a la aplicación.
+- Se conserva **🌍 EARTH** solo en Inicio y **❓ DUDAS · CONSEJOS DEL PEREGRINO** únicamente en el Resumen de las etapas.
+- Se mantienen mapas 2D/3D, 🎯 centrar ruta, flechas 3D en sentido de marcha, GPS, perfil, servicios, albergues, Menú peregrino, AEMET, Favoritos, descargas, Wikiloc, Earth, fotos, comentarios, likes, visitas, WhatsApp y Mi Camino.
+
 
 ## V6.6.2 · cambio rápido 2D / 3D
 
@@ -132,14 +143,14 @@ Los trazados y servicios no sustituyen la señalización del Camino ni los aviso
 - Wikiloc abre la búsqueda de la etapa por origen/destino; el GPX de BUEN CAMINO puede importarse para conservar el trazado descargado.
 
 
-## V7.2 — Cabecera limpia, albergues/credencial y centrar ruta
+## V7.2 — Centrar ruta y cabecera limpia
 
-- El botón superior **DUDAS** se elimina de las etapas y de sus Resúmenes.
-- Se conserva únicamente **❓ DUDAS · CONSEJOS DEL PEREGRINO** dentro del Resumen de cada etapa.
-- En Inicio se mantiene el acceso **🌍 EARTH**, sin mostrar DUDAS.
-- La vista **🐚 ALBERGUES DEL CAMINO** coloca primero los albergues que los datos permiten identificar como públicos o institucionales.
-- Las fichas de albergue incorporan distintivo 🐚, logo/favicon de su web cuando existe y estado del **sello de credencial**.
-- Si el sello no consta en datos abiertos se muestra claramente **“confirmar en recepción”**; no se inventa disponibilidad.
-- Se recuerda que los sellos se conservan en la credencial y que la **Compostela se tramita en Santiago**.
-- Todos los mapas 2D incorporan un botón flotante **🎯 RUTA** para volver a encuadrar el recorrido después de mover o ampliar el mapa.
-- El mapa 3D incorpora **🎯 CENTRAR** con el mismo comportamiento.
+- **Nuevo botón 🎯 CENTRAR RUTA en MAPA GRANDE**, visible en la barra superior.
+- Todos los mapas 2D llevan además un botón flotante **🎯 RUTA** en el centro superior del mapa.
+- Al pulsarlo, el mapa vuelve a encuadrar automáticamente toda la etapa después de hacer zoom o desplazarla.
+- El mapa 3D incorpora **🎯 CENTRAR**.
+- Se elimina el botón superior duplicado **DUDAS** dentro de las etapas.
+- Se mantiene únicamente **❓ DUDAS · CONSEJOS DEL PEREGRINO** en el Resumen de cada etapa.
+- En Inicio se mantiene **🌍 EARTH**.
+- Los albergues del Camino se mejoran con distintivo 🐚, identificación público/institucional cuando los datos lo permiten, logo de su web cuando existe y estado de sello de credencial.
+- Si no consta el sello, la app indica **confirmar en recepción** en lugar de inventarlo.

@@ -34,16 +34,3 @@ const STAGES = [
  {n:33,from:'O Pedrouzo',to:'Santiago de Compostela',km:20.0,h:'5 h',difficulty:'Media',gain:390}
 ];
 
-const STAGE30_SERVICES = [
- {id:'a1',type:'alojamiento',name:'Albergue público — ficha de ejemplo',sub:'Palas de Rei · Verificar disponibilidad',price:'€',phone:'',note:'Datos demostrativos: se sustituirán por fuentes oficiales/verificadas.'},
- {id:'a2',type:'alojamiento',name:'Pensión — ficha de ejemplo',sub:'Palas de Rei · Habitación',price:'€€',phone:'',note:'Precio orientativo, no precio en tiempo real.'},
- {id:'f1',type:'farmacia',name:'Farmacias cercanas',sub:'Búsqueda mediante OpenStreetMap al activar ubicación',price:'',phone:'',note:'Sin API de pago.'},
- {id:'s1',type:'salud',name:'Servicios sanitarios',sub:'Centro de salud / urgencias cercanas',price:'',phone:'112',note:'En una emergencia real, utiliza el 112.'},
- {id:'t1',type:'taxi',name:'Taxis locales',sub:'Directorio local pendiente de verificación',price:'',phone:'',note:'La base definitiva incluirá teléfonos verificados.'},
- {id:'p1',type:'policia',name:'Policía / Guardia Civil',sub:'Directorio oficial pendiente de carga',price:'',phone:'112',note:'Emergencias: 112.'},
- {id:'m1',type:'ayuntamiento',name:'Ayuntamiento',sub:'Palas de Rei · ficha institucional',price:'',phone:'',note:'Se enlazará a fuente municipal oficial.'}
-];
-
-const STAGE_COORDS = {
- 30: {center:[42.925,-7.82], zoom:10, route:[[42.806,-7.616],[42.826,-7.670],[42.878,-7.772],[42.900,-7.837],[42.874,-7.868],[42.873,-7.868]]},
-};

@@ -1,4 +1,4 @@
-# BUEN CAMINO — V7.0 PRO
+# BUEN CAMINO — V7.1 PRO
 
 ## V6.6.2 · cambio rápido 2D / 3D
 
@@ -115,3 +115,18 @@ Los trazados y servicios no sustituyen la señalización del Camino ni los aviso
 - Cada restaurante no verificado tiene un botón **🍲 Consultar menú peregrino**.
 - El botón especial existe en las 33 etapas.
 - No se marca como “menú peregrino” un establecimiento si no hay evidencia en los datos disponibles.
+
+
+## V7.1 — Servicios reforzados + Earth/Wikiloc por etapa
+
+- Se eliminan del **Resumen** los seis botones de preparación que ocupaban espacio.
+- Esas necesidades se trasladan a **Servicios de etapa**: Agua, Comer, Botiquín/Farmacia, Pilas/Capa/Tienda y Credencial/Información.
+- **Servicios** combina los puntos existentes con una búsqueda en vivo de OpenStreetMap alrededor del trazado de cada etapa.
+- Se refuerza especialmente la detección de **albergues/hostels/refugios y alojamientos** a lo largo de la ruta.
+- Las fichas muestran, cuando existen: teléfono, segundo teléfono, web, email, horario, dirección y km de marcha.
+- Cada lugar con coordenadas incorpora **Maps, Cómo llegar, Google Earth, Fotos del lugar, Fotos cercanas y ficha OSM**.
+- En “Servicios cerca del punto” se añaden **Earth y Fotos**.
+- En **Inicio**, el botón superior rojo DUDAS se sustituye por **🌍 EARTH**. DUDAS sigue disponible dentro de cada etapa.
+- Las 33 tarjetas de etapa incorporan botones directos **🌍 EARTH · 🟢 WIKILOC · ⬇ GPS**.
+- El botón GPS mantiene las descargas **GPX, GPX + servicios, KML y TCX**.
+- Wikiloc abre la búsqueda de la etapa por origen/destino; el GPX de BUEN CAMINO puede importarse para conservar el trazado descargado.

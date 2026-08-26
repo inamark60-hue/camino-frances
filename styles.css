@@ -209,3 +209,29 @@
  .pilgrim-special-head{align-items:stretch;flex-direction:column}
  .pilgrim-special-head button{width:100%}
 }
+
+/* V7.1 · Servicios reforzados + Earth/Wikiloc por etapa */
+.earth-home-btn{background:#0c67b7!important}
+.earth-home-btn b{background:#fff!important;color:#0c67b7!important;font-size:18px!important}
+
+.pilgrim-needs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:8px 0 13px}
+.pilgrim-needs button{border:1px solid #d8e2ec;border-radius:12px;background:#fff;min-height:58px;padding:7px 4px;color:#173b66;font-size:20px}
+.pilgrim-needs button b{display:block;font-size:8px;margin-top:3px}
+
+.service-contact .earth-service{background:#e8f4ff;border-color:#b9d8f3;color:#0758aa}
+.service-contact .photo-service{background:#fff6d9;border-color:#ead478;color:#5d4b00}
+
+.stage-card-copy{min-width:0}
+.stage-route-links{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.stage-route-links button{border:1px solid #d7e1ec;border-radius:9px;background:#f4f8fd;color:#153b66;min-height:31px;padding:5px 7px;font-size:8px;font-weight:900}
+.stage-route-links button:first-child{background:#e8f4ff}
+.stage-route-links button:nth-child(2){background:#edf8ec;color:#27622a}
+.stage-route-links button:nth-child(3){background:#fff4c5;color:#5d4800}
+.stage-card{grid-template-columns:54px minmax(0,1fr) 44px!important}
+.stage-card-actions{display:flex!important;flex-direction:column;gap:5px!important;grid-template-columns:none!important}
+.stage-card-actions button{width:40px;min-height:36px}
+
+@media(max-width:430px){
+ .pilgrim-needs{grid-template-columns:repeat(3,1fr)}
+ .stage-route-links button{font-size:7px;padding:5px 6px}
+}

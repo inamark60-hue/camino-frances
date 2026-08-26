@@ -61,3 +61,10 @@
 .photo-loading,.photo-nearby-link{display:block;padding:7px 5px;color:#5d6b7c;font-size:9px;text-decoration:none}
 .route-popup{max-width:270px}
 .popup-actions{grid-template-columns:1fr 1fr}
+
+
+/* ===== V5.4 · servicios y alojamientos más útiles ===== */
+.checklist .check-action{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px;font-size:12px;text-align:left;color:var(--ink)}
+.checklist .check-action:active{background:#eef5ff}
+.service-head{align-items:flex-start;gap:10px}.service-head-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.aemet-btn.secondary{background:#eef4ff;color:#0758aa;border:1px solid #c9d8eb}
+.service-title{display:flex;align-items:center;gap:10px}.service-title h3{margin:2px 0 0}.service-symbol{width:40px;height:40px;display:grid;place-items:center;border-radius:11px;background:#eef4ff;font-size:22px;flex:0 0 40px}.service-contact a{min-height:38px}.service-popup{max-width:285px;min-width:215px}.service-popup small{display:block;color:#5c697b;margin-top:4px;line-height:1.3}.service-popup .popup-phone{margin-top:6px;font-weight:900;color:#176d3c}.service-popup .popup-actions{grid-template-columns:repeat(2,minmax(0,1fr))}.bc-marker{min-width:38px;height:38px;font-size:18px}

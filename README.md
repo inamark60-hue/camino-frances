@@ -1,12 +1,19 @@
-# BUEN CAMINO — V6.1 PRO
+# BUEN CAMINO — V6.2 PRO
 
-Corrección de las 33 etapas.
+Compartir directo y funciones de comunidad local.
 
-- Se corrige el fallo de V6.0 que impedía procesar las rutas de las etapas 2–33.
-- Cada etapa carga y encuadra su tramo correspondiente del Camino Francés.
-- La etapa 1 mantiene su trazado local verificado.
-- Las demás etapas usan la geometría de Open Pilgrimages / OpenStreetMap y se ajustan al tramo concreto.
-- Se corrigen los límites de Terradillos → El Burgo Ranero y El Burgo Ranero → Mansilla para conservar el esquema de 33 etapas de BUEN CAMINO.
-- Se mantienen Me gusta, Compartir, Donación, Servicios, Alojamientos, GPS, Perfil, fotos y mapa topográfico.
+- Botón grande para compartir BUEN CAMINO por WhatsApp con el enlace directo de la aplicación (GitHub Pages), no el repositorio de GitHub.
+- Compartir cada etapa mantiene un enlace directo `#stage-N`.
+- Contadores visibles de visitas, etapas que gustan y comentarios guardados en el dispositivo.
+- Contadores por etapa de visitas y Me gusta del dispositivo.
+- Botón de comentarios en Inicio. Los comentarios se guardan localmente y no se envían a un servidor.
+- Botón 📷 en cada etapa para añadir fotos del usuario desde cámara/galería.
+- Galería local por etapa, con opción de compartir o eliminar cada foto.
+- Las fotos se comprimen antes de guardarlas en IndexedDB para reducir espacio.
+- Se mantienen las 33 etapas, mapas, rutas, servicios, alojamientos, GPS, perfil, AEMET, DUDAS, compartir y donación al creador inatiusmarki.
 
-Datos de ruta: Open Pilgrimages / OpenStreetMap (ODbL).
+## Importante sobre los contadores y la comunidad
+
+Esta versión no usa un servidor de pago ni un backend externo. Por tanto, los likes, visitas, comentarios y fotos son locales a cada dispositivo. Para tener cifras globales y fotos/comentarios compartidos entre todos los peregrinos haría falta un backend común y moderación.
+
+El enlace compartido abre directamente la web-app de BUEN CAMINO. Si el receptor la tiene instalada, Android/Chrome puede reutilizar la PWA, pero una apertura garantizada dentro de la app instalada requiere una aplicación nativa/Android con enlaces de aplicación verificados.

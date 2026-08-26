@@ -1,14 +1,29 @@
 {
-  "name":"BUEN CAMINO",
-  "short_name":"BUEN CAMINO",
-  "start_url":"./",
-  "scope":"./",
-  "display":"standalone",
-  "background_color":"#062b65",
-  "theme_color":"#062b65",
-  "orientation":"any",
-  "icons":[
-    {"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
-    {"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
-  ]
+  "name": "BUEN CAMINO",
+  "short_name": "BUEN CAMINO",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#062b65",
+  "theme_color": "#062b65",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "id": "./",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "description": "BUEN CAMINO · guía gratuita del Camino Francés con 33 etapas, mapas y servicios."
 }

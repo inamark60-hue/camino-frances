@@ -1,5 +1,14 @@
-# BUEN CAMINO — V8.7 PRO
+# BUEN CAMINO — V8.8 PRO
 
+
+
+## V8.8 · MIRA ON/OFF + Sistema Solar
+
+- Nuevo **👁 MIRA ON/OFF** en la vista normal y en Gran Cielo. OFF elimina la marca central y la selección automática para explorar el cielo en general; ON usa una marca discreta de visor, sin diana circular.
+- Añadidos **Sol, Luna, Mercurio, Venus, Marte, Júpiter, Saturno, Urano y Neptuno** con posición calculada localmente para fecha/hora actuales.
+- Sol, Luna y planetas aparecen con símbolo/nombre, son tocables y abren ficha interna con altitud, acimut y datos básicos. La Luna incluye fracción iluminada aproximada.
+- Las posiciones planetarias usan elementos orbitales de baja precisión adecuados para una carta de orientación visual; no sustituyen efemérides astronómicas profesionales.
+- INFO CIELO incluye ahora estrellas, constelaciones, cielo profundo y Sistema Solar.
 
 ## V8.7 · Gran Cielo refinado + zoom tipo telescopio
 

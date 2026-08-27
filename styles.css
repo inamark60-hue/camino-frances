@@ -432,3 +432,11 @@
 .sky-polar-compass .map-compass-rose{inset:4px!important}.sky-polar-compass .map-compass-rose>.deg-tick{transform-origin:50% 31px!important;height:4px!important}.sky-polar-compass .map-compass-rose>.deg-tick.major{height:7px!important}.sky-polar-compass .map-compass-rose b{font-size:11px!important}.sky-polar-compass .map-compass-arrow{font-size:17px!important;top:-6px!important}.sky-polar-compass .map-compass-dot{width:8px!important;height:8px!important;border-width:2px!important}.sky-polar-compass .map-compass-reading strong{font-size:14px!important}.sky-polar-compass .map-compass-reading>b{font-size:10px!important}.sky-polar-compass .map-compass-reading small{font-size:6px!important;background:transparent!important;padding:1px!important;color:#fff!important;text-shadow:0 1px 2px #000,0 0 3px #000!important}.sky-polar-compass .map-compass-reading strong,.sky-polar-compass .map-compass-reading>b{color:#fff;text-shadow:0 1px 2px #000,0 0 3px #000}.sky-polar-compass .map-compass-close{font-size:20px!important;width:26px!important;height:26px!important;color:#fff!important;text-shadow:0 1px 3px #000,0 0 4px #000!important}
 @media (orientation:landscape){.sky-telescope-controls{top:10px;right:10px}.sky-detail-float{top:184px;right:10px}.sky-polar-compass{width:102px!important;min-height:106px!important}}
 @media(max-width:520px){.sky-telescope-controls{right:7px;top:8px;grid-template-columns:40px}.sky-telescope-controls button{min-height:38px}.sky-detail-float{right:7px;top:178px;min-width:78px;font-size:8px}}
+
+
+/* ===== V8.8 · MIRA ON/OFF + Sistema Solar ===== */
+[data-sky-aim][data-mode="off"]{background:rgba(255,255,255,.93)!important;color:#17345f!important}
+[data-sky-aim][data-mode="on"]{background:#fff0a8!important;color:#554000!important}
+.sky-aim-btn{grid-column:auto!important}
+.sky-full-tools{flex-wrap:wrap}
+@media(max-width:520px){.sky-full-tools button{min-width:0}}

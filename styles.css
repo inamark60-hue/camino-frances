@@ -325,3 +325,24 @@
 .sky-info{background:#102744;color:#fff;border-radius:13px;padding:10px 12px;margin-bottom:9px;display:flex;flex-direction:column;gap:2px}.sky-info b{font-size:11px}.sky-info span{font-size:9px;color:#d7e7f7}.sky-info small{font-size:8px;color:#9fb5cb}.sky-wrap{border-radius:17px;background:radial-gradient(circle at center,#18385f,#07182e 70%);padding:8px;border:1px solid #28486a}.sky-wrap svg{display:block;width:100%;height:auto}.sky-horizon{fill:#0a203a;stroke:#89a7c4;stroke-width:1.3}.sky-alt{fill:none;stroke:#35506e;stroke-width:.7;stroke-dasharray:3 4}.sky-axis{stroke:#334e6c;stroke-width:.6}.sky-dir{fill:#ffc400;font-size:12px;font-weight:950}.sky-line{stroke:#7aa5cf;stroke-width:1.1;opacity:.7}.sky-star{fill:#fff;stroke:#d9eaff;stroke-width:.5}.sky-star-label{fill:#dfeeff;font-size:7px}.sky-zenith{fill:#ffc400}.sky-visible{margin-top:9px;background:#fff;border:1px solid #dce5ee;border-radius:13px;padding:10px}.sky-visible>b{display:block;font-size:10px;color:#17345f;margin-bottom:6px}.sky-visible>div{display:flex;flex-wrap:wrap;gap:5px}.sky-visible span{border-radius:999px;background:#eef4fb;color:#34516f;padding:4px 7px;font-size:8px;font-weight:900}
 
 @media(max-width:370px){.home-feature-actions{grid-template-columns:1fr}.home-feature-actions button{min-height:46px;flex-direction:row}.detail-feature-actions button{font-size:8px}.feature-head{padding-left:12px;padding-right:12px}.feature-head h1{font-size:20px}.feature-back span{display:none}.feature-map{min-height:340px}.compass-wrap{width:min(82vw,285px)}}
+
+
+/* ===== V7.8 · brújula estabilizada sobre mapa grande ===== */
+.focus-top .focus-compass-toggle.active{background:#ffc400;color:#062b65}
+.focus-compass-overlay{position:absolute;right:62px;top:12px;z-index:24;width:174px;min-height:174px;border:1px solid #ffffffb8;border-radius:22px;background:rgba(245,249,253,.66);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);box-shadow:0 5px 20px #001b4b2b;pointer-events:none;padding:10px 10px 8px;color:#102b50}
+.focus-compass-overlay[hidden]{display:none}
+.focus-compass-close{pointer-events:auto;position:absolute;right:5px;top:5px;z-index:5;width:30px;height:30px;border:0;border-radius:50%;background:rgba(6,43,101,.82);color:#fff;font-size:20px;line-height:1}
+.focus-compass-mini{position:relative;width:126px;height:126px;margin:3px auto 0;border-radius:50%;border:3px solid rgba(6,43,101,.72);background:rgba(255,255,255,.28)}
+.focus-compass-rose{position:absolute;inset:6px;border-radius:50%;transition:transform .12s linear;will-change:transform}
+.focus-compass-rose b{position:absolute;font-size:15px;font-weight:950;text-shadow:0 1px 2px #fff}
+.focus-compass-rose .n{top:0;left:50%;transform:translateX(-50%);color:#cf2828}.focus-compass-rose .s{bottom:0;left:50%;transform:translateX(-50%)}.focus-compass-rose .e{right:2px;top:50%;transform:translateY(-50%)}.focus-compass-rose .w{left:2px;top:50%;transform:translateY(-50%)}
+.focus-compass-rose i{position:absolute;left:50%;top:12%;bottom:12%;width:1px;background:linear-gradient(#17345f99 0 5%,transparent 5% 95%,#17345f99 95%);transform:translateX(-50%)}
+.focus-compass-rose i:after{content:"";position:absolute;left:50%;top:50%;width:100%;height:100%;background:inherit;transform:translate(-50%,-50%) rotate(90deg)}
+.focus-compass-arrow{position:absolute;left:50%;top:-7px;transform:translateX(-50%);font-size:24px;color:#ffc400;text-shadow:0 1px 3px #000a;z-index:3}
+.focus-compass-dot{position:absolute;left:50%;top:50%;width:13px;height:13px;border-radius:50%;transform:translate(-50%,-50%);background:#17345f;border:3px solid #ffc400;z-index:3}
+.focus-compass-reading{margin-top:1px;text-align:center;display:grid;grid-template-columns:auto auto;justify-content:center;align-items:baseline;gap:0 6px}.focus-compass-reading strong{font-size:22px}.focus-compass-reading>b{font-size:13px}.focus-compass-reading small{grid-column:1/3;font-size:7px;font-weight:850;color:#52657c;min-height:10px}
+@media(max-width:420px){.focus-compass-overlay{right:54px;top:9px;width:148px;min-height:151px;padding:7px}.focus-compass-mini{width:108px;height:108px}.focus-compass-rose b{font-size:13px}.focus-compass-reading strong{font-size:19px}.focus-compass-close{width:27px;height:27px;font-size:18px}}
+.focus-overlay.force-landscape .focus-compass-overlay{right:58px;top:9px;width:150px;min-height:151px;padding:7px}.focus-overlay.force-landscape .focus-compass-mini{width:108px;height:108px}
+
+/* V7.8 · barra del mapa grande desplazable en pantallas estrechas */
+.focus-top{overflow-x:auto;overflow-y:hidden;scrollbar-width:none}.focus-top::-webkit-scrollbar{display:none}.focus-top strong,.focus-top button{flex:0 0 auto}

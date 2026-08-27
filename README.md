@@ -1,4 +1,15 @@
-# BUEN CAMINO — V7.7 PRO · PUBLIC READY
+# BUEN CAMINO — V7.8 PRO · PUBLIC READY
+
+## V7.8 — Brújula estabilizada + brújula sobre mapa grande
+
+- Corregida la brújula para no mezclar eventos absolutos y relativos.
+- Prioriza `webkitCompassHeading` en iOS y `deviceorientationabsolute` en Android/Chromium.
+- Filtro circular adaptativo para reducir oscilaciones, incluido el salto 359°/0°.
+- Compensación de orientación visual y del modo horizontal forzado del mapa grande.
+- Nuevo botón **🧭 BRÚJULA** en el mapa grande: muestra una rosa semitransparente sobre el mapa sin impedir arrastrar o hacer zoom.
+- Se conserva la brújula independiente de Inicio y Etapas.
+- Recursos y Service Worker actualizados a **V7.8**.
+
 
 ## V7.7 — Ruta bici, brújula y cielo dentro de la app
 

@@ -1,14 +1,14 @@
-const CACHE='buen-camino-v85-network-first';
-const RUNTIME='buen-camino-v85-runtime';
+const CACHE='buen-camino-v86-network-first';
+const RUNTIME='buen-camino-v86-runtime';
 const CORE=[
   './',
   './index.html',
   './privacy.html',
-  './styles.css?v=85',
-  './app.js?v=85',
-  './data.js?v=85',
-  './verified-routes.js?v=85',
-  './manifest.webmanifest?v=85',
+  './styles.css?v=86',
+  './app.js?v=86',
+  './data.js?v=86',
+  './verified-routes.js?v=86',
+  './manifest.webmanifest?v=86',
   './buen-camino-logo.png',
   './icon-192.png',
   './icon-512.png',
@@ -27,6 +27,10 @@ self.addEventListener('activate',event=>{
   );
 });
 
+function isCelestialData(url){
+  return ['cdn.jsdelivr.net','raw.githubusercontent.com','dieghernan.github.io'].includes(url.hostname) && url.pathname.includes('celestial_data') && /\/(?:stars\.6|constellations(?:\.lines)?|messier)\.min\.geojson$/.test(url.pathname);
+}
+
 function isPilgrimageData(url){
   if(!['cdn.jsdelivr.net','raw.githubusercontent.com'].includes(url.hostname))return false;
   if(!url.pathname.includes('open-pilgrimages'))return false;
@@ -39,7 +43,7 @@ self.addEventListener('fetch',event=>{
 
   // Guarda como respaldo los datos abiertos de ruta/waypoints una vez descargados.
   if(url.origin!==self.location.origin){
-    if(isPilgrimageData(url)){
+    if(isPilgrimageData(url)||isCelestialData(url)){
       event.respondWith(
         fetch(event.request).then(response=>{
           if(response&&response.ok){const copy=response.clone();caches.open(RUNTIME).then(cache=>cache.put(event.request,copy)).catch(()=>{});}

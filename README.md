@@ -1,6 +1,6 @@
-# BUEN CAMINO — V8.5 PRO
+# BUEN CAMINO — V8.6 PRO
 
-## V8.5 · Gran Cielo orientado a la dirección real
+## V8.6 · Gran Cielo orientado a la dirección real
 - Corrige el visor del cielo para usar la matriz W3C completa de orientación del dispositivo.
 - El giro de pantalla vertical/horizontal ya no se suma al rumbo físico de la cámara; solo rota los ejes visuales.
 - El centro amarillo representa la dirección de la parte trasera del móvil.
@@ -266,3 +266,13 @@ Los trazados y servicios no sustituyen la señalización del Camino ni los aviso
 - En Inicio se mantiene **🌍 EARTH**.
 - Los albergues del Camino se mejoran con distintivo 🐚, identificación público/institucional cuando los datos lo permiten, logo de su web cuando existe y estado de sello de credencial.
 - Si no consta el sello, la app indica **confirmar en recepción** en lugar de inventarlo.
+
+## V8.6 · Gran Cielo profesional
+
+- Catálogo ampliado bajo demanda: miles de estrellas hasta magnitud 6, las 88 constelaciones IAU y objetos Messier (galaxias, nebulosas y cúmulos).
+- Renderizado en Canvas para mantener fluidez con los sensores del móvil.
+- La constelación más próxima al retículo central se resalta en amarillo, dibuja sus líneas/estrellas de figura y muestra su nombre tocable.
+- Información interna al tocar estrellas, constelaciones u objetos de cielo profundo.
+- Brújula celeste polar/altazimutal con AZ (azimut) y ALT (altura), arrastrable.
+- Catálogo remoto con caché de respaldo para usos posteriores; si no hay red queda disponible el catálogo básico integrado.
+- Datos astronómicos: Celestial Data / d3-celestial (J2000), con atribución a sus autores y licencia abierta BSD 3-Clause indicada por el proyecto fuente.

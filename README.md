@@ -1,6 +1,16 @@
-# BUEN CAMINO — V8.3 PRO · PUBLIC READY
+# BUEN CAMINO — V8.4 PRO
 
-## Corrección V8.3
+## V8.4 · arranque autorreparable
+- Corrige la pantalla de Inicio vacía observada en Android/Chrome cuando se mezclan archivos o cachés de versiones diferentes.
+- `home()` ya no puede quedar bloqueado por un error de limpieza de mapas/sensores.
+- Vigilante de arranque en `index.html`: si el contenido central queda vacío, elimina solo cachés `buen-camino-*`, desregistra el service worker antiguo y recarga una vez.
+- No borra `localStorage`: conserva Favoritos, Mi Camino, likes, visitas y comentarios.
+- Si el problema persiste, muestra un botón de recuperación en vez de una pantalla blanca.
+- Mantiene todas las funciones y las 33 etapas de V8.3.
+
+# BUEN CAMINO — V8.4 PRO · PUBLIC READY
+
+## Corrección V8.4
 
 - Corregido el Inicio en blanco de V8.2.
 - Restauradas las funciones internas de Estrellas/Constelaciones que calculan la posición de etapa, GPS y orientación del teléfono.
@@ -9,14 +19,14 @@
 - No se modifican las 33 etapas ni sus trazados.
 
 
-## V8.3 — Gran vista cielo e información interactiva
+## V8.4 — Gran vista cielo e información interactiva
 
 - Nuevo botón **🌌 GRAN VISTA CIELO**: carta celeste a pantalla completa, adaptable automáticamente a vertical y horizontal.
 - En la vista normal y en la gran vista aparecen **🏠 INICIO · 👣 ETAPA · ← VOLVER**. Volver recupera además la posición de desplazamiento desde la que se abrió la herramienta.
 - Nuevo **ℹ️ INFO ESTRELLAS Y CONSTELACIONES**. Al tocar una estrella, una línea de constelación o un nombre, la ficha se abre dentro de la app.
 - Las estrellas muestran constelación, magnitud aparente y, cuando hay ubicación, altitud y acimut calculados para ese momento.
 - La gran vista conserva GPS, Modo Cielo y brújula flotante; la brújula puede moverse con el dedo.
-- Se mantienen las 33 etapas y los datos/trazados anteriores. Caché PWA actualizada a V8.3.
+- Se mantienen las 33 etapas y los datos/trazados anteriores. Caché PWA actualizada a V8.4.
 
 
 ## V8.1 — Correcciones de mapas tras prueba real en Samsung/Chrome

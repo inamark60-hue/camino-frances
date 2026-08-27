@@ -1,4 +1,15 @@
-# BUEN CAMINO — V7.6 PRO · PUBLIC READY
+# BUEN CAMINO — V7.7 PRO · PUBLIC READY
+
+## V7.7 — Ruta bici, brújula y cielo dentro de la app
+
+- Nuevos botones **🚴 RUTA BICI · 🧭 BRÚJULA · ✨ ESTRELLAS / CONSTELACIONES** en Inicio y en las etapas.
+- Las tres funciones se abren como pantallas internas de BUEN CAMINO, con **← VOLVER** a la ventana exacta anterior.
+- **Ruta bici**: cálculo orientativo mediante BRouter con perfil de bicicleta `trekking` y datos OpenStreetMap; si el servicio no responde, se muestra el Camino como referencia claramente advertida, sin afirmar que todos los tramos sean ciclables.
+- **Brújula**: utiliza Device Orientation del móvil, con solicitud de permiso cuando el sistema lo exige y sin guardar el rumbo.
+- **Estrellas y constelaciones**: carta celeste local calculada con fecha/hora y posición de etapa o GPS; incluye estrellas brillantes y trazos de Osa Mayor, Casiopea, Orión, Cisne y Lira cuando están sobre el horizonte.
+- Política de privacidad actualizada para reflejar GPS de cielo, sensores de orientación y BRouter.
+- Se conservan las **33 etapas**, mapas 2D/3D, GPS, perfiles, servicios, albergues, AEMET, Earth, Wikiloc, descargas, Favoritos, Mi Camino, fotos, comentarios, guía y donación directa a Save the Children.
+- Recursos y Service Worker actualizados a **V7.7**.
 
 ## V7.6 — Public Ready
 

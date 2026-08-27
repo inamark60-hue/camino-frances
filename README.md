@@ -1,4 +1,17 @@
-# BUEN CAMINO — V7.5 PRO
+# BUEN CAMINO — V7.6 PRO · PUBLIC READY
+
+## V7.6 — Public Ready
+
+- Nuevo botón **📲 INSTALAR APP** en Inicio, compatible con el aviso nativo de instalación PWA cuando el navegador lo ofrece y con instrucciones para Android/iPhone cuando no está disponible.
+- Bienvenida de primer uso, mostrada una sola vez en el dispositivo.
+- Nuevo apartado **Acerca de · Privacidad · Datos**, con explicación transparente del almacenamiento local, GPS y proveedores externos.
+- Nueva página pública **privacy.html**, preparada para enlazarla desde una futura ficha de tienda.
+- Opción confirmada para borrar Favoritos, Mi Camino, likes, comentarios, contadores y fotos locales.
+- Estado visible **Con conexión / Sin conexión**.
+- Service Worker V7.6: conserva el enfoque network-first y añade respaldo en caché para los datos abiertos de Open Pilgrimages tras su primera descarga, sin cachear masivamente mapas o servicios externos.
+- Metadatos PWA/iPhone mejorados y manifest clasificado como travel/navigation.
+- Se mantienen las **33 etapas** y todas las funciones de V7.5.
+
 
 ## V7.5 — Guía de uso integrada
 

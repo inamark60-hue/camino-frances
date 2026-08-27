@@ -1,12 +1,14 @@
-const CACHE='buen-camino-v75-network-first';
+const CACHE='buen-camino-v76-network-first';
+const RUNTIME='buen-camino-v76-runtime';
 const CORE=[
   './',
   './index.html',
-  './styles.css?v=75',
-  './app.js?v=75',
-  './data.js?v=75',
-  './verified-routes.js?v=75',
-  './manifest.webmanifest?v=75',
+  './privacy.html',
+  './styles.css?v=76',
+  './app.js?v=76',
+  './data.js?v=76',
+  './verified-routes.js?v=76',
+  './manifest.webmanifest?v=76',
   './buen-camino-logo.png',
   './icon-192.png',
   './icon-512.png',
@@ -14,64 +16,61 @@ const CORE=[
 ];
 
 self.addEventListener('install',event=>{
-  event.waitUntil(
-    caches.open(CACHE)
-      .then(cache=>cache.addAll(CORE))
-      .then(()=>self.skipWaiting())
-  );
+  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting()));
 });
 
 self.addEventListener('activate',event=>{
   event.waitUntil(
     caches.keys()
-      .then(keys=>Promise.all(keys.filter(k=>k.startsWith('buen-camino-')&&k!==CACHE).map(k=>caches.delete(k))))
+      .then(keys=>Promise.all(keys.filter(k=>k.startsWith('buen-camino-')&&![CACHE,RUNTIME].includes(k)).map(k=>caches.delete(k))))
       .then(()=>self.clients.claim())
   );
 });
 
-self.addEventListener('fetch',event=>{
-  if(event.request.method!=='GET') return;
+function isPilgrimageData(url){
+  if(!['cdn.jsdelivr.net','raw.githubusercontent.com'].includes(url.hostname))return false;
+  if(!url.pathname.includes('open-pilgrimages'))return false;
+  return /\/(?:stages\.json|route\.geojson|waypoints\.geojson)$/.test(url.pathname);
+}
 
+self.addEventListener('fetch',event=>{
+  if(event.request.method!=='GET')return;
   const url=new URL(event.request.url);
 
-  // Recursos externos (mapas, 3D, servicios): nunca interceptarlos.
-  if(url.origin!==self.location.origin) return;
+  // Guarda como respaldo los datos abiertos de ruta/waypoints una vez descargados.
+  if(url.origin!==self.location.origin){
+    if(isPilgrimageData(url)){
+      event.respondWith(
+        fetch(event.request).then(response=>{
+          if(response&&response.ok){const copy=response.clone();caches.open(RUNTIME).then(cache=>cache.put(event.request,copy)).catch(()=>{});}
+          return response;
+        }).catch(()=>caches.match(event.request).then(hit=>hit||Response.error()))
+      );
+    }
+    // Mapas, meteorología, fotos y servicios externos no se cachean masivamente.
+    return;
+  }
 
   const isNavigation=event.request.mode==='navigate';
   const isFreshAsset=/\.(?:html|js|css|webmanifest)$/i.test(url.pathname);
-
-  if(isNavigation || isFreshAsset){
-    // Network-first: evita que una versión antigua quede bloqueada en Android.
+  if(isNavigation||isFreshAsset){
     event.respondWith(
       fetch(event.request,{cache:'no-store'})
         .then(response=>{
-          if(response && response.ok){
-            const copy=response.clone();
-            caches.open(CACHE).then(cache=>cache.put(event.request,copy)).catch(()=>{});
-          }
+          if(response&&response.ok){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(event.request,copy)).catch(()=>{});}
           return response;
         })
         .catch(async()=>{
-          const hit=await caches.match(event.request);
-          if(hit) return hit;
-          if(isNavigation) return (await caches.match('./index.html')) || Response.error();
+          const hit=await caches.match(event.request);if(hit)return hit;
+          if(isNavigation)return(await caches.match('./index.html'))||Response.error();
           return Response.error();
         })
     );
     return;
   }
 
-  // Imágenes/iconos: cache-first, con actualización de respaldo.
-  event.respondWith(
-    caches.match(event.request).then(hit=>{
-      if(hit) return hit;
-      return fetch(event.request).then(response=>{
-        if(response && response.ok){
-          const copy=response.clone();
-          caches.open(CACHE).then(cache=>cache.put(event.request,copy)).catch(()=>{});
-        }
-        return response;
-      });
-    })
-  );
+  event.respondWith(caches.match(event.request).then(hit=>hit||fetch(event.request).then(response=>{
+    if(response&&response.ok){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(event.request,copy)).catch(()=>{});}
+    return response;
+  })));
 });

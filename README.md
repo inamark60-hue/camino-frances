@@ -1,7 +1,12 @@
-# BUEN CAMINO — V9.7 PRO
+# BUEN CAMINO — V9.8 PRO
 
 
-## V9.7 · Gestos 2D restaurados en mapa pequeño y grande
+## V9.8 · Táctil nativo Android/Chrome en mapas 2D
+
+- Un dedo: arrastrar.
+- Dos dedos: pellizcar y desplazar.
+- Toque corto sobre bola amarilla: abre su ficha.
+- En Android/Chrome los dedos usan Touch Events nativos; Pointer Events quedan para ratón/lápiz.
 
 - Corregido el mapa topográfico incrustado en el Resumen/Mapa de las etapas para Android y PWA.
 - Un dedo desplaza el mapa.

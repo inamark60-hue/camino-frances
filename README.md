@@ -1,12 +1,12 @@
-# BUEN CAMINO — V9.4 PRO
+# BUEN CAMINO — V9.5 PRO
 
 
-## V9.4 · Gestos táctiles de mapas de etapa
+## V9.5 · Gestos 2D restaurados en mapa pequeño y grande
 
 - Corregido el mapa topográfico incrustado en el Resumen/Mapa de las etapas para Android y PWA.
 - Un dedo desplaza el mapa.
 - Dos dedos permiten desplazar y hacer zoom por pellizco.
-- Se separa el manejo táctil móvil de Pointer Events para evitar pérdidas del gesto multitáctil en Chrome/Samsung.
+- Se unifica el manejo táctil con Pointer Events y captura de cada dedo para evitar que Chrome/Samsung pierda el gesto cuando cambian las teselas del mapa.
 - Se conservan los botones +/−, bolas amarillas, 3D, Street View, brújula y la navegación existente.
 - Las 33 etapas y sus trazados no se modifican.
 

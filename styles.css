@@ -459,5 +459,5 @@
 @media(orientation:landscape){.route-point-sheet{align-items:center}.route-point-card{max-height:88dvh}.route-point-photo .route-photo-scroll figure{flex-basis:min(58%,360px)}.route-point-photo .route-photo-scroll img{height:145px}}
 @media(max-width:520px){.route-point-sheet{padding:0}.route-point-card{width:100%;max-height:82dvh;border-radius:18px 18px 0 0;border-left:0;border-right:0;border-bottom:0}.route-point-photo .route-photo-scroll figure{flex-basis:88%}.route-point-photo .route-photo-scroll img{height:168px}}
 
-/* ===== V9.4 · Gestos táctiles robustos en mapas incrustados ===== */
+/* ===== V9.5 · Gestos táctiles robustos en mapas incrustados ===== */
 .bc-map{touch-action:none;-ms-touch-action:none;overscroll-behavior:contain}

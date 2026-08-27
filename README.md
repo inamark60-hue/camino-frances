@@ -1,4 +1,16 @@
-# BUEN CAMINO — V8.6 PRO
+# BUEN CAMINO — V8.7 PRO
+
+
+## V8.7 · Gran Cielo refinado + zoom tipo telescopio
+
+- Zoom de carta celeste ×1, ×2, ×4 y ×8 mediante botones +/− en Gran Vista, pellizco con dos dedos y doble toque para volver a ×1.
+- Tres niveles de detalle: Simple, Normal y Completo. Reducen o amplían estrellas, objetos Messier y etiquetas sin perder las 88 constelaciones.
+- Etiquetas de objetos de cielo profundo despejadas: los nombres Mxx solo aparecen al aproximarse al retículo, evitando nubes de texto.
+- Constelaciones no seleccionadas más tenues; la constelación apuntada resalta en amarillo. Tras mantener la puntería aproximadamente un segundo aparece “Toca para información”.
+- Nombre de la constelación desplazado del centro para no tapar las estrellas.
+- Brújula celeste polar/altazimutal más pequeña y totalmente transparente, manteniendo AZ/ALT y arrastre táctil.
+- Fichas de constelaciones ampliadas con código IAU, época/estrella de referencia cuando constan, estrellas principales cuando el catálogo las identifica, dirección actual para localizarla, información astronómica y fotografías libres.
+- El zoom es una ampliación digital de la carta celeste; no sustituye a un telescopio óptico ni hace visibles objetos que el ojo no puede observar.
 
 ## V8.6 · Gran Cielo orientado a la dirección real
 - Corrige el visor del cielo para usar la matriz W3C completa de orientación del dispositivo.

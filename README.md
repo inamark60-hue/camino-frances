@@ -1,14 +1,13 @@
-# BUEN CAMINO — V9.2 PRO
-- Brújula: bloqueo de Norte con histéresis (entrada ±4,5° / salida ±9°) para evitar el salto 357° ↔ 0°.
+# BUEN CAMINO — V9.3 PRO
 
-## V9.2 · Norte estable sin salto 357° ↔ 0°
+## V9.3 · Brújula continua 359° ↔ 0°
 
-- Brújula: media circular temporal, zona muerta anti-temblor, refresco visual limitado y bloqueo suave del Norte para evitar el baile alrededor de 359°/0°.
-- Los cambios rápidos de rumbo siguen respondiendo sin mezclar fuentes de orientación.
-- Las bolas amarillas 2D/3D abren ahora una ficha interna robusta, independiente de la posición del punto en el mapa.
-- La ficha mantiene Maps, Earth, OSM, Fotos y Servicios cerca.
-- Fotos Wikimedia Commons: galería horizontal de hasta 12 imágenes libres, reintento, timeout y aviso claro si no hay cobertura/datos.
-- Si Commons falla, el resto de la información del punto sigue funcionando.
+- Eliminado por completo el bloqueo/histéresis del Norte de V9.2, que podía dejar la aguja pegada en N y provocar saltos al acercarse desde Oeste.
+- Nuevo filtrado circular continuo: cada lectura avanza siempre por el arco más corto, de forma simétrica al girar en ambos sentidos.
+- Eliminada la transición CSS de la rosa/dial para impedir que el navegador interprete 359° → 0° como una vuelta casi completa.
+- Zona muerta mínima solo para ruido fino del magnetómetro; no fija ni atrae la aguja al Norte.
+- Refresco aproximado a 20 Hz para una respuesta más natural al giro lento.
+- Se conservan la ficha robusta de bolas amarillas, galería Wikimedia Commons y todas las mejoras V9.1/V9.2.
 - 33 etapas y trazados conservados sin cambios.
 
 ## V8.9 · Reparación Gran Cielo

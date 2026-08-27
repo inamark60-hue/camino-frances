@@ -1,14 +1,14 @@
-const CACHE='buen-camino-v92-network-first';
-const RUNTIME='buen-camino-v92-runtime';
+const CACHE='buen-camino-v93-network-first';
+const RUNTIME='buen-camino-v93-runtime';
 const CORE=[
   './',
   './index.html',
   './privacy.html',
-  './styles.css?v=92',
-  './app.js?v=92',
-  './data.js?v=92',
-  './verified-routes.js?v=92',
-  './manifest.webmanifest?v=92',
+  './styles.css?v=93',
+  './app.js?v=93',
+  './data.js?v=93',
+  './verified-routes.js?v=93',
+  './manifest.webmanifest?v=93',
   './buen-camino-logo.png',
   './icon-192.png',
   './icon-512.png',

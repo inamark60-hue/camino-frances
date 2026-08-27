@@ -1,7 +1,7 @@
-# BUEN CAMINO — V9.9 PRO
+# BUEN CAMINO — V10.0 PRO
 
 
-## V9.9 · Táctil nativo Android/Chrome en mapas 2D
+## V10.0 · Táctil nativo Android/Chrome en mapas 2D
 
 - Un dedo: arrastrar.
 - Dos dedos: pellizcar y desplazar.

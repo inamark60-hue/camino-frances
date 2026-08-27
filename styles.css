@@ -467,3 +467,6 @@
 
 /* V9.7: el contenedor BCMap captura los gestos; la capa auxiliar ya no intercepta toques. */
 .bc-gesture-layer{pointer-events:auto!important;touch-action:none!important;-webkit-tap-highlight-color:transparent}.bc-map{touch-action:none!important;-webkit-user-select:none;user-select:none}
+
+.bc-map-build{position:absolute;left:8px;top:8px;z-index:40;background:#0b3e7ccc;color:#fff;border-radius:7px;padding:3px 6px;font-size:7px;font-weight:950;pointer-events:none}
+.bc-gesture-layer{pointer-events:none!important}

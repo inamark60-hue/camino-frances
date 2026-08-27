@@ -461,3 +461,6 @@
 
 /* ===== V9.5 · Gestos táctiles robustos en mapas incrustados ===== */
 .bc-map{touch-action:none;-ms-touch-action:none;overscroll-behavior:contain}
+
+/* ===== V9.6 · Superficie táctil dedicada 2D ===== */
+.bc-tiles,.bc-overlay{pointer-events:none}.bc-gesture-layer{position:absolute;inset:0;z-index:3;pointer-events:auto;touch-action:none!important;-ms-touch-action:none!important;user-select:none;-webkit-user-select:none;background:transparent}.bc-markers{z-index:4;pointer-events:none}.bc-marker{pointer-events:auto}.bc-map-controls,.bc-layer,.bc-center-route,.bc-map-view-controls,.bc-service-filters,.bc-map-legend{pointer-events:auto}

@@ -1,7 +1,7 @@
-# BUEN CAMINO — V9.5 PRO
+# BUEN CAMINO — V9.6 PRO
 
 
-## V9.5 · Gestos 2D restaurados en mapa pequeño y grande
+## V9.6 · Gestos 2D restaurados en mapa pequeño y grande
 
 - Corregido el mapa topográfico incrustado en el Resumen/Mapa de las etapas para Android y PWA.
 - Un dedo desplaza el mapa.

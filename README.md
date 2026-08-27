@@ -1,8 +1,15 @@
-# BUEN CAMINO — V8.8 PRO
+# BUEN CAMINO — V8.9 PRO
+
+## V8.9 · Reparación Gran Cielo
+
+- Corrige el fallo de V8.8 que dejaba el lienzo astronómico vacío al calcular Mercurio/Marte con claves orbitales incompatibles.
+- Normaliza los nombres internos de los planetas y protege cada cálculo planetario de forma independiente.
+- Si una efeméride planetaria falla, la carta de estrellas y constelaciones sigue dibujándose; nunca debe quedar el cielo en blanco por un solo objeto.
+- Mantiene MIRA ON/OFF, Sistema Solar, zoom telescópico y los tres niveles de detalle.
 
 
 
-## V8.8 · MIRA ON/OFF + Sistema Solar
+## V8.9 · MIRA ON/OFF + Sistema Solar
 
 - Nuevo **👁 MIRA ON/OFF** en la vista normal y en Gran Cielo. OFF elimina la marca central y la selección automática para explorar el cielo en general; ON usa una marca discreta de visor, sin diana circular.
 - Añadidos **Sol, Luna, Mercurio, Venus, Marte, Júpiter, Saturno, Urano y Neptuno** con posición calculada localmente para fecha/hora actuales.

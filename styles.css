@@ -434,7 +434,7 @@
 @media(max-width:520px){.sky-telescope-controls{right:7px;top:8px;grid-template-columns:40px}.sky-telescope-controls button{min-height:38px}.sky-detail-float{right:7px;top:178px;min-width:78px;font-size:8px}}
 
 
-/* ===== V8.8 · MIRA ON/OFF + Sistema Solar ===== */
+/* ===== V8.9 · MIRA ON/OFF + Sistema Solar · reparación ===== */
 [data-sky-aim][data-mode="off"]{background:rgba(255,255,255,.93)!important;color:#17345f!important}
 [data-sky-aim][data-mode="on"]{background:#fff0a8!important;color:#554000!important}
 .sky-aim-btn{grid-column:auto!important}

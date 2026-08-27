@@ -13,11 +13,11 @@
   <link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="preconnect" href="https://tiles.mapterhorn.com" crossorigin>
-  <link rel="manifest" href="manifest.webmanifest?v=1002">
+  <link rel="manifest" href="manifest.webmanifest?v=1006">
   <link rel="canonical" href="https://inamark60-hue.github.io/camino-frances/">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
-  <link rel="stylesheet" href="styles.css?v=1003">
+  <link rel="stylesheet" href="styles.css?v=1006">
   <title>BUEN CAMINO</title>
 </head>
 <body>
@@ -46,9 +46,9 @@
     </section>
   </div>
   <div id="focusOverlay" class="focus-overlay" hidden></div>
-  <script src="data.js?v=1003"></script>
-  <script src="verified-routes.js?v=1003"></script>
-  <script src="app.js?v=1003"></script>
+  <script src="data.js?v=1006"></script>
+  <script src="verified-routes.js?v=1006"></script>
+  <script src="app.js?v=1006"></script>
   <script>
   /* V10.0: vigilante de arranque. No borra localStorage: conserva Favoritos, Mi Camino, likes y comentarios. */
   setTimeout(function(){
@@ -67,7 +67,7 @@
         if('serviceWorker' in navigator){var reg=await navigator.serviceWorker.getRegistration('./');if(reg)await reg.unregister().catch(function(){return false})}
         if('caches' in window){var keys=await caches.keys();await Promise.all(keys.filter(function(k){return k.indexOf('buen-camino-')===0}).map(function(k){return caches.delete(k)}))}
       }catch(e){}
-      var u=new URL('./',location.href);u.searchParams.set('bcv','100');u.searchParams.set('repair',String(Date.now()));location.replace(u.href);
+      var u=new URL('./',location.href);u.searchParams.set('bcv','1006');u.searchParams.set('repair',String(Date.now()));location.replace(u.href);
     })();
   },1600);
   </script>

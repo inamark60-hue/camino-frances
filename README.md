@@ -1,3 +1,12 @@
+# BUEN CAMINO — V8.5 PRO
+
+## V8.5 · Gran Cielo orientado a la dirección real
+- Corrige el visor del cielo para usar la matriz W3C completa de orientación del dispositivo.
+- El giro de pantalla vertical/horizontal ya no se suma al rumbo físico de la cámara; solo rota los ejes visuales.
+- El centro amarillo representa la dirección de la parte trasera del móvil.
+- Se muestra `APUNTANDO: azimut · cardinal · ALT` para comprobar rumbo e inclinación en tiempo real.
+- Mantiene GPS, Gran Vista, información interactiva, brújula y las 33 etapas.
+
 # BUEN CAMINO — V8.4 PRO
 
 ## V8.4 · arranque autorreparable

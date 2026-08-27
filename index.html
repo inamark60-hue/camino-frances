@@ -13,11 +13,11 @@
   <link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="preconnect" href="https://tiles.mapterhorn.com" crossorigin>
-  <link rel="manifest" href="manifest.webmanifest?v=84">
+  <link rel="manifest" href="manifest.webmanifest?v=85">
   <link rel="canonical" href="https://inamark60-hue.github.io/camino-frances/">
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
-  <link rel="stylesheet" href="styles.css?v=84">
+  <link rel="stylesheet" href="styles.css?v=85">
   <title>BUEN CAMINO</title>
 </head>
 <body>
@@ -46,18 +46,18 @@
     </section>
   </div>
   <div id="focusOverlay" class="focus-overlay" hidden></div>
-  <script src="data.js?v=84"></script>
-  <script src="verified-routes.js?v=84"></script>
-  <script src="app.js?v=84"></script>
+  <script src="data.js?v=85"></script>
+  <script src="verified-routes.js?v=85"></script>
+  <script src="app.js?v=85"></script>
   <script>
-  /* V8.4: vigilante de arranque. No borra localStorage: conserva Favoritos, Mi Camino, likes y comentarios. */
+  /* V8.5: vigilante de arranque. No borra localStorage: conserva Favoritos, Mi Camino, likes y comentarios. */
   setTimeout(function(){
     var host=document.getElementById('app');
     if(!host || host.children.length) return;
-    var key='bc-boot-watchdog-v84';
+    var key='bc-boot-watchdog-v85';
     var already=false; try{already=sessionStorage.getItem(key)==='1'}catch(e){}
     if(already){
-      host.innerHTML='<section class="section"><div style="background:#fff;border:1px solid #d5e0ec;border-radius:16px;padding:18px;margin-top:12px"><h2 style="margin-top:0">BUEN CAMINO</h2><p>No se han cargado todos los archivos de la versión 8.4.</p><button id="bcEmergencyReload" style="width:100%;min-height:48px;border:0;border-radius:12px;background:#ffc400;color:#062b65;font-weight:950">↻ RECARGAR APP</button><small style="display:block;margin-top:10px;color:#65758a">Tus datos personales guardados en el dispositivo se conservan.</small></div></section>';
+      host.innerHTML='<section class="section"><div style="background:#fff;border:1px solid #d5e0ec;border-radius:16px;padding:18px;margin-top:12px"><h2 style="margin-top:0">BUEN CAMINO</h2><p>No se han cargado todos los archivos de la versión 8.5.</p><button id="bcEmergencyReload" style="width:100%;min-height:48px;border:0;border-radius:12px;background:#ffc400;color:#062b65;font-weight:950">↻ RECARGAR APP</button><small style="display:block;margin-top:10px;color:#65758a">Tus datos personales guardados en el dispositivo se conservan.</small></div></section>';
       document.getElementById('bcEmergencyReload').onclick=function(){location.reload()};
       return;
     }
@@ -67,7 +67,7 @@
         if('serviceWorker' in navigator){var reg=await navigator.serviceWorker.getRegistration('./');if(reg)await reg.unregister().catch(function(){return false})}
         if('caches' in window){var keys=await caches.keys();await Promise.all(keys.filter(function(k){return k.indexOf('buen-camino-')===0}).map(function(k){return caches.delete(k)}))}
       }catch(e){}
-      var u=new URL('./',location.href);u.searchParams.set('bcv','84');u.searchParams.set('repair',String(Date.now()));location.replace(u.href);
+      var u=new URL('./',location.href);u.searchParams.set('bcv','85');u.searchParams.set('repair',String(Date.now()));location.replace(u.href);
     })();
   },1600);
   </script>

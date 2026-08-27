@@ -1,6 +1,7 @@
-# BUEN CAMINO — V9.1 PRO
+# BUEN CAMINO — V9.2 PRO
+- Brújula: bloqueo de Norte con histéresis (entrada ±4,5° / salida ±9°) para evitar el salto 357° ↔ 0°.
 
-## V9.1 · Brújula más estable + bolas amarillas reparadas
+## V9.2 · Norte estable sin salto 357° ↔ 0°
 
 - Brújula: media circular temporal, zona muerta anti-temblor, refresco visual limitado y bloqueo suave del Norte para evitar el baile alrededor de 359°/0°.
 - Los cambios rápidos de rumbo siguen respondiendo sin mezclar fuentes de orientación.

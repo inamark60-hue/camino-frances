@@ -1,6 +1,16 @@
-# BUEN CAMINO — V8.0 PRO · PUBLIC READY
+# BUEN CAMINO — V8.1 PRO · PUBLIC READY
 
-## V8.0 — Rutas a pie, brújula universal, cielo orientado y mapas ampliados
+## V8.1 — Correcciones de mapas tras prueba real en Samsung/Chrome
+
+- **Street View visible también en 3D / mapa grande**, con el hombre amarillo en el lateral derecho.
+- **Topo 3D sin capas fantasma duplicadas**: al usar Topo se ocultan líneas/textos vectoriales de la base y quedan el raster topográfico, relieve, edificios 3D y la ruta BUEN CAMINO.
+- **SÍMBOLOS TOPO** explica la simbología cartográfica (curvas de nivel, caminos, carreteras, vegetación, agua, edificios, cumbres, aparcamiento, transporte, etc.).
+- **Ruta bici por etapa**: selector con 🚴, marcador 🚴 de inicio y 🏁 de final, además del botón BICI en las tarjetas de etapa.
+- Todas las herramientas internas incorporan un botón explícito **🏠 INICIO** además de ← ANTERIOR.
+- Las bolas amarillas muestran una **galería horizontal desplazable** de hasta 10 imágenes cercanas de Wikimedia Commons con autor/licencia, cuando existen archivos abiertos compatibles.
+- Se conservan íntegramente las 33 etapas, datos y trazados de V8.0.
+
+## Base V8.0 — Rutas a pie, brújula universal, cielo orientado y mapas ampliados
 
 - Nuevo acceso **🚶 A PIE · RUTAS** en Inicio y botón pequeño en las 33 etapas. Usa el trazado real disponible del Camino y mantiene las advertencias de señalización física.
 - Brújula flotante transparente, segmentada cada 10°, arrastrable y reutilizable en mapas pequeño/grande y en la carta celeste. Rosa negra + aguja roja; al coincidir el norte del mapa/cielo y el norte del dispositivo, rosa roja + aguja negra.
@@ -9,7 +19,7 @@
 - Botones laterales en mapas: **3D**, hombre amarillo **Street View** y **SÍMBOLOS** con leyenda. Street View busca primero fotografía abierta de KartaView y ofrece Google como respaldo externo.
 - Vista 3D basada en OpenFreeMap/MapLibre con caminos, edificios extruidos y relieve; en modo **TOPO · CURVAS** superpone OpenTopoMap para mantener las curvas de nivel visibles.
 - Botón 3D con fondo blanco y volumen azul. Guía App ampliada con el uso de A pie, brújula, cielo, símbolos, Street View, 3D y fotos libres.
-- Se conservan íntegramente `data.js`, `verified-routes.js`, las **33 etapas** y las funciones anteriores. Recursos y Service Worker actualizados a **V8.0**.
+- Se conservan íntegramente `data.js`, `verified-routes.js`, las **33 etapas** y las funciones anteriores. Recursos y Service Worker actualizados a **V8.1**.
 
 
 ## V7.9 — Brújula flotante en mapas pequeño y grande

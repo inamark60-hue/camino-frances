@@ -346,7 +346,7 @@
 .focus-top{overflow-x:auto;overflow-y:hidden;scrollbar-width:none}.focus-top::-webkit-scrollbar{display:none}.focus-top strong,.focus-top button{flex:0 0 auto}
 
 
-/* ---------- V8.0 · A pie, controles de mapa, brújula graduada y cielo profesional ---------- */
+/* ---------- V8.1 · mapas, rutas y navegación de herramientas ---------- */
 .home-feature-actions{grid-template-columns:repeat(4,minmax(0,1fr))}
 .detail-feature-actions{grid-template-columns:repeat(4,1fr)}
 .stage-route-links .internal-feature.walk{background:#fff6d8;color:#5d4a00}
@@ -380,3 +380,24 @@
 /* V8.0: los ticks de grados no heredan la barra central de la aguja */
 .map-compass-rose>.deg-tick{bottom:auto!important}
 .map-compass-rose>.deg-tick:after{display:none!important;content:none!important}
+
+
+/* ---------- V8.1 · correcciones tras prueba Samsung/Chrome ---------- */
+.feature-head-actions{display:flex;flex-direction:column;gap:6px;flex:0 0 auto}.feature-home{border:1px solid #ffffff66;border-radius:12px;background:#fff;color:#17345f;min-height:42px;padding:7px 10px;font-weight:950}.feature-home span{font-size:9px}.feature-back span{font-size:9px}
+@media(max-width:420px){.feature-head{gap:9px}.feature-head-actions{gap:5px}.feature-head-actions button{min-width:86px;padding:7px 8px}.feature-head h1{font-size:21px}}
+
+/* Inicio/fin visibles en las herramientas por etapa. */
+.bc-travel-marker{z-index:7!important;min-width:38px!important;height:38px!important;background:#fff!important;font-size:20px!important}.bc-travel-marker.bike{border-color:#0758aa!important;box-shadow:0 2px 8px #0758aa55!important}.bc-travel-marker.walk{border-color:#9a7600!important;box-shadow:0 2px 8px #9a760055!important}.bc-travel-marker.finish{font-size:18px!important}
+.stage-route-links .internal-feature.bike{background:#e8f4ff;color:#0758aa;border-color:#b9d8f4}.stage-route-links .internal-feature.bike b{font-weight:1000}
+
+/* SÍMBOLOS se refiere a la cartografía OpenTopoMap. */
+.topo-symbol-legend{max-height:min(72%,520px);overflow:auto}.topo-legend-note,.topo-legend-app-note{display:block!important;font-size:7px!important;line-height:1.35;color:#66798e;padding:5px 0}.topo-legend-app-note{font-weight:850;color:#17345f}.topo-symbol-legend i{display:inline-grid;place-items:center;flex:0 0 30px;width:30px;height:14px;font-style:normal}.topo-contour{height:0!important;border-top:1px solid #a97754}.topo-contour.major{border-top-width:2px;border-top-color:#8d5d3a}.topo-path{height:0!important;border-top:2px dashed #555}.topo-road{height:7px!important;border-radius:5px;border:1px solid #986e38;background:#f4d77b}.topo-road.major{background:#f6a94e;border-color:#a85b16}.topo-road.local{background:#fff;border-color:#999}.topo-forest{background:#b9df9f;border:1px solid #6fa35d}.topo-water{background:#9fc9f5;border:1px solid #4d91d3}.topo-building{background:#b8bbc0;border:1px solid #777}.topo-peak{font-size:14px;color:#333}.topo-parking{background:#3b91e5;color:#fff;font-weight:1000;border-radius:2px;width:18px!important}.topo-transport{color:#3189d5;font-size:14px}.topo-religious{color:#5c5c5c;font-size:14px}
+
+/* Galería Commons: varias fotos desplazables con el dedo. */
+.route-photo-grid{display:none!important}.route-photo-scroll{display:flex;gap:7px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;touch-action:pan-x;padding:5px 1px 7px;scrollbar-width:thin}.route-photo-scroll figure{margin:0;flex:0 0 82%;min-width:0;scroll-snap-align:start;background:#f7f9fc;border:1px solid #dce4ed;border-radius:9px;overflow:hidden}.route-photo-scroll img{display:block;width:100%;height:118px;object-fit:cover;background:#eaf0f5}.route-photo-scroll figcaption{padding:5px 6px;font-size:7px;line-height:1.25;color:#52677d}.route-photo-scroll figcaption b,.route-photo-scroll figcaption span,.route-photo-scroll figcaption a{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.route-photo-scroll figcaption a{color:#0a5ca9}.route-photo-swipe{display:block;font-size:7px!important;font-weight:900;color:#17345f!important;text-align:center;margin:1px 0 3px}.terrain-route-photo .route-photo-scroll figure{flex-basis:88%}.terrain-route-photo .route-photo-scroll img{height:105px}.route-popup{max-width:min(300px,calc(100% - 18px))}.terrain-route-popup{min-width:min(280px,78vw)!important}
+
+/* Street View también en 3D / mapa grande. */
+.terrain-street-float{position:absolute;right:12px;top:92px;z-index:36;width:52px;min-height:56px;border:1px solid #173f76;border-radius:10px;background:#fff;color:#17345f;font-weight:950;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3px}.terrain-street-float small{display:block;font-size:6px;line-height:1.05}.terrain-symbols-float{top:156px!important;min-height:54px!important}.terrain-map-legend{top:92px!important;right:72px!important}.terrain-map-legend span{display:flex!important;align-items:center;gap:7px;border-top:1px solid #e8edf3;padding:4px 0;margin:0!important}.terrain-map-legend .topo-legend-note,.terrain-map-legend .topo-legend-app-note{margin-bottom:4px!important}
+
+/* En pantallas pequeñas no ocultar fotos adicionales. */
+@media(max-width:520px){.route-photo-scroll figure{flex-basis:88%}.route-photo-grid figure:nth-child(3){display:block}}

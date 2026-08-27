@@ -8,7 +8,10 @@
   "theme_color": "#062b65",
   "orientation": "any",
   "lang": "es",
-  "categories": ["travel", "navigation"],
+  "categories": [
+    "travel",
+    "navigation"
+  ],
   "icons": [
     {
       "src": "icon-192.png",
@@ -27,5 +30,5 @@
   "launch_handler": {
     "client_mode": "navigate-existing"
   },
-  "description": "BUEN CAMINO · guía gratuita del Camino Francés con 33 etapas, mapas y servicios agrupados, meteorología y descargas GPS. Versión 8.0 PRO · Public Ready."
+  "description": "BUEN CAMINO · guía gratuita del Camino Francés con 33 etapas, mapas y servicios agrupados, meteorología y descargas GPS. Versión 8.1 PRO · Public Ready."
 }

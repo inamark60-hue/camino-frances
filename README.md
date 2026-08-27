@@ -1,12 +1,14 @@
-# BUEN CAMINO — V9.0 PRO
+# BUEN CAMINO — V9.1 PRO
 
-## V9.0 · Buscador celeste + planetas destacados
+## V9.1 · Brújula más estable + bolas amarillas reparadas
 
-- ☀ ☾ ☿ ♀ ♂ ♃ ♄ ♅ ♆: Sol, Luna y planetas se dibujan más grandes y con mayor contraste.
-- 🔎 BUSCAR CIELO busca planetas, estrellas con nombre y las 88 constelaciones.
-- Al seleccionar un objetivo, una flecha guía indica izquierda/derecha y arriba/abajo hasta llevar el móvil hacia él.
-- Cuando el objetivo entra en el centro del visor aparece “ENCONTRADO”.
-- La búsqueda funciona dentro de BUEN CAMINO y se puede cancelar sin salir de Gran Cielo.
+- Brújula: media circular temporal, zona muerta anti-temblor, refresco visual limitado y bloqueo suave del Norte para evitar el baile alrededor de 359°/0°.
+- Los cambios rápidos de rumbo siguen respondiendo sin mezclar fuentes de orientación.
+- Las bolas amarillas 2D/3D abren ahora una ficha interna robusta, independiente de la posición del punto en el mapa.
+- La ficha mantiene Maps, Earth, OSM, Fotos y Servicios cerca.
+- Fotos Wikimedia Commons: galería horizontal de hasta 12 imágenes libres, reintento, timeout y aviso claro si no hay cobertura/datos.
+- Si Commons falla, el resto de la información del punto sigue funcionando.
+- 33 etapas y trazados conservados sin cambios.
 
 ## V8.9 · Reparación Gran Cielo
 

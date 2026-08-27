@@ -1,14 +1,28 @@
-# BUEN CAMINO — V7.8 PRO · PUBLIC READY
+# BUEN CAMINO — V8.0 PRO · PUBLIC READY
 
-## V7.8 — Brújula estabilizada + brújula sobre mapa grande
+## V8.0 — Rutas a pie, brújula universal, cielo orientado y mapas ampliados
+
+- Nuevo acceso **🚶 A PIE · RUTAS** en Inicio y botón pequeño en las 33 etapas. Usa el trazado real disponible del Camino y mantiene las advertencias de señalización física.
+- Brújula flotante transparente, segmentada cada 10°, arrastrable y reutilizable en mapas pequeño/grande y en la carta celeste. Rosa negra + aguja roja; al coincidir el norte del mapa/cielo y el norte del dispositivo, rosa roja + aguja negra.
+- Estrellas y constelaciones renovadas: GPS continuo opcional, orientación por sensores del móvil, vista que responde al movimiento y fichas internas de Osa Mayor, Osa Menor, Casiopea, Orión, Cisne y Lira.
+- Las fichas de constelaciones y los puntos amarillos pueden cargar fotografías reales desde Wikimedia Commons, filtrando licencias abiertas y mostrando autor/licencia/enlace cuando los metadatos están disponibles.
+- Botones laterales en mapas: **3D**, hombre amarillo **Street View** y **SÍMBOLOS** con leyenda. Street View busca primero fotografía abierta de KartaView y ofrece Google como respaldo externo.
+- Vista 3D basada en OpenFreeMap/MapLibre con caminos, edificios extruidos y relieve; en modo **TOPO · CURVAS** superpone OpenTopoMap para mantener las curvas de nivel visibles.
+- Botón 3D con fondo blanco y volumen azul. Guía App ampliada con el uso de A pie, brújula, cielo, símbolos, Street View, 3D y fotos libres.
+- Se conservan íntegramente `data.js`, `verified-routes.js`, las **33 etapas** y las funciones anteriores. Recursos y Service Worker actualizados a **V8.0**.
+
+
+## V7.9 — Brújula flotante en mapas pequeño y grande
 
 - Corregida la brújula para no mezclar eventos absolutos y relativos.
 - Prioriza `webkitCompassHeading` en iOS y `deviceorientationabsolute` en Android/Chromium.
 - Filtro circular adaptativo para reducir oscilaciones, incluido el salto 359°/0°.
 - Compensación de orientación visual y del modo horizontal forzado del mapa grande.
-- Nuevo botón **🧭 BRÚJULA** en el mapa grande: muestra una rosa semitransparente sobre el mapa sin impedir arrastrar o hacer zoom.
+- **🧭 BRÚJULA** flotante disponible en mapa pequeño, mapa de etapa y mapa grande.
+- Fondo totalmente transparente; rosa negra y aguja roja. Al alinear el norte del mapa con el norte de la brújula, la rosa pasa a rojo y la aguja a negro.
+- La brújula se puede arrastrar con el dedo y conserva su posición relativa entre ventanas de mapa.
 - Se conserva la brújula independiente de Inicio y Etapas.
-- Recursos y Service Worker actualizados a **V7.8**.
+- Recursos y Service Worker actualizados a **V7.9**.
 
 
 ## V7.7 — Ruta bici, brújula y cielo dentro de la app

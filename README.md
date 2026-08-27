@@ -1,4 +1,12 @@
-# BUEN CAMINO — V8.9 PRO
+# BUEN CAMINO — V9.0 PRO
+
+## V9.0 · Buscador celeste + planetas destacados
+
+- ☀ ☾ ☿ ♀ ♂ ♃ ♄ ♅ ♆: Sol, Luna y planetas se dibujan más grandes y con mayor contraste.
+- 🔎 BUSCAR CIELO busca planetas, estrellas con nombre y las 88 constelaciones.
+- Al seleccionar un objetivo, una flecha guía indica izquierda/derecha y arriba/abajo hasta llevar el móvil hacia él.
+- Cuando el objetivo entra en el centro del visor aparece “ENCONTRADO”.
+- La búsqueda funciona dentro de BUEN CAMINO y se puede cancelar sin salir de Gran Cielo.
 
 ## V8.9 · Reparación Gran Cielo
 
@@ -9,7 +17,7 @@
 
 
 
-## V8.9 · MIRA ON/OFF + Sistema Solar
+## V8.8 · MIRA ON/OFF + Sistema Solar
 
 - Nuevo **👁 MIRA ON/OFF** en la vista normal y en Gran Cielo. OFF elimina la marca central y la selección automática para explorar el cielo en general; ON usa una marca discreta de visor, sin diana circular.
 - Añadidos **Sol, Luna, Mercurio, Venus, Marte, Júpiter, Saturno, Urano y Neptuno** con posición calculada localmente para fecha/hora actuales.

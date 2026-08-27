@@ -440,3 +440,14 @@
 .sky-aim-btn{grid-column:auto!important}
 .sky-full-tools{flex-wrap:wrap}
 @media(max-width:520px){.sky-full-tools button{min-width:0}}
+
+/* ===== V9.0 · Planetas visibles + buscador celeste con flecha guía ===== */
+.sky-search-btn{grid-column:auto!important}
+[data-sky-search].active{background:#dff4ff!important;color:#0b4c79!important;border-color:#77b9df!important}
+.sky-search-overlay{position:fixed;inset:0;z-index:12050;background:rgba(2,13,27,.76);display:grid;place-items:start center;padding:max(18px,env(safe-area-inset-top)) 12px max(18px,env(safe-area-inset-bottom));overflow:auto}
+.sky-search-card{width:min(620px,100%);background:#fff;color:#17345f;border-radius:18px;border:1px solid #b8cade;padding:14px;box-shadow:0 12px 40px #0008}
+.sky-search-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.sky-search-head small{font-size:9px;color:#667b91;font-weight:900}.sky-search-head h3{margin:3px 0 12px;font-size:18px}.sky-search-head button{width:40px;height:40px;border:0;border-radius:50%;background:#eef3f8;color:#17345f;font-size:22px;font-weight:950}
+.sky-search-card>label{display:block;font-size:10px;font-weight:950;margin-bottom:6px}.sky-search-card>input{width:100%;min-height:48px;border:2px solid #b9c9d9;border-radius:13px;padding:0 13px;font:inherit;font-size:16px;color:#17345f;background:#fff;outline:none}.sky-search-card>input:focus{border-color:#1682c5;box-shadow:0 0 0 3px #1682c522}
+.sky-search-results{display:grid;gap:6px;margin-top:10px;max-height:min(58dvh,520px);overflow:auto}.sky-search-results>button{min-height:48px;border:1px solid #d2deea;border-radius:12px;background:#f9fbfd;color:#17345f;text-align:left;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;gap:12px}.sky-search-results>button span{min-width:0}.sky-search-results>button b{font-size:12px}.sky-search-results>button small{font-size:9px;color:#677b90;text-align:right}.sky-search-results>button:active{background:#fff0a8}.sky-search-results .empty{padding:18px;text-align:center;color:#718299}
+.sky-search-clear{width:100%;min-height:44px;margin-top:10px;border:1px solid #e1a6a6;border-radius:12px;background:#fff5f5;color:#8b2323;font-weight:900}.sky-search-help{display:block;margin-top:9px;color:#65788e;line-height:1.4}
+@media(max-width:520px){.sky-search-overlay{padding-left:8px;padding-right:8px}.sky-search-card{border-radius:14px;padding:11px}.sky-search-results>button{align-items:flex-start;flex-direction:column;gap:2px}.sky-search-results>button small{text-align:left}.sky-full-tools [data-sky-search]{min-width:0}}

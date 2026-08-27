@@ -1,34 +1,80 @@
-{
-  "name": "BUEN CAMINO",
-  "short_name": "BUEN CAMINO",
-  "start_url": "./",
-  "scope": "./",
-  "display": "standalone",
-  "background_color": "#f4f7fb",
-  "theme_color": "#062b65",
-  "orientation": "any",
-  "lang": "es",
-  "categories": [
-    "travel",
-    "navigation"
-  ],
-  "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
-  "id": "./",
-  "launch_handler": {
-    "client_mode": "navigate-existing"
-  },
-  "description": "BUEN CAMINO · guía gratuita del Camino Francés con 33 etapas, mapas y servicios agrupados, meteorología y descargas GPS. Versión 10.0.4 PRO · mapa 2D táctil Android/Samsung · Public Ready."
+const CACHE='buen-camino-v1005-touch2d';
+const RUNTIME='buen-camino-v1005-runtime';
+const CORE=[
+  './',
+  './index.html',
+  './privacy.html',
+  './styles.css?v=1005',
+  './app.js?v=1005',
+  './data.js?v=1005',
+  './verified-routes.js?v=1005',
+  './manifest.webmanifest?v=1005',
+  './buen-camino-logo.png',
+  './icon-192.png',
+  './icon-512.png',
+  './icon.svg'
+];
+
+self.addEventListener('install',event=>{
+  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(CORE)).then(()=>self.skipWaiting()));
+});
+
+self.addEventListener('activate',event=>{
+  event.waitUntil(
+    caches.keys()
+      .then(keys=>Promise.all(keys.filter(k=>k.startsWith('buen-camino-')&&![CACHE,RUNTIME].includes(k)).map(k=>caches.delete(k))))
+      .then(()=>self.clients.claim())
+  );
+});
+
+function isCelestialData(url){
+  return ['cdn.jsdelivr.net','raw.githubusercontent.com','dieghernan.github.io'].includes(url.hostname) && url.pathname.includes('celestial_data') && /\/(?:stars\.6|constellations(?:\.lines)?|messier)\.min\.geojson$/.test(url.pathname);
 }
+
+function isPilgrimageData(url){
+  if(!['cdn.jsdelivr.net','raw.githubusercontent.com'].includes(url.hostname))return false;
+  if(!url.pathname.includes('open-pilgrimages'))return false;
+  return /\/(?:stages\.json|route\.geojson|waypoints\.geojson)$/.test(url.pathname);
+}
+
+self.addEventListener('fetch',event=>{
+  if(event.request.method!=='GET')return;
+  const url=new URL(event.request.url);
+
+  // Guarda como respaldo los datos abiertos de ruta/waypoints una vez descargados.
+  if(url.origin!==self.location.origin){
+    if(isPilgrimageData(url)||isCelestialData(url)){
+      event.respondWith(
+        fetch(event.request).then(response=>{
+          if(response&&response.ok){const copy=response.clone();caches.open(RUNTIME).then(cache=>cache.put(event.request,copy)).catch(()=>{});}
+          return response;
+        }).catch(()=>caches.match(event.request).then(hit=>hit||Response.error()))
+      );
+    }
+    // Mapas, meteorología, fotos y servicios externos no se cachean masivamente.
+    return;
+  }
+
+  const isNavigation=event.request.mode==='navigate';
+  const isFreshAsset=/\.(?:html|js|css|webmanifest)$/i.test(url.pathname);
+  if(isNavigation||isFreshAsset){
+    event.respondWith(
+      fetch(event.request,{cache:'no-store'})
+        .then(response=>{
+          if(response&&response.ok){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(event.request,copy)).catch(()=>{});}
+          return response;
+        })
+        .catch(async()=>{
+          const hit=await caches.match(event.request);if(hit)return hit;
+          if(isNavigation)return(await caches.match('./index.html'))||Response.error();
+          return Response.error();
+        })
+    );
+    return;
+  }
+
+  event.respondWith(caches.match(event.request).then(hit=>hit||fetch(event.request).then(response=>{
+    if(response&&response.ok){const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(event.request,copy)).catch(()=>{});}
+    return response;
+  })));
+});

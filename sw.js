@@ -1,14 +1,14 @@
-const CACHE='buen-camino-v1004-touch2d';
-const RUNTIME='buen-camino-v1004-runtime';
+const CACHE='buen-camino-v1005-touch2d';
+const RUNTIME='buen-camino-v1005-runtime';
 const CORE=[
   './',
   './index.html',
   './privacy.html',
-  './styles.css?v=1004',
-  './app.js?v=1004',
-  './data.js?v=1004',
-  './verified-routes.js?v=1004',
-  './manifest.webmanifest?v=1004',
+  './styles.css?v=1005',
+  './app.js?v=1005',
+  './data.js?v=1005',
+  './verified-routes.js?v=1005',
+  './manifest.webmanifest?v=1005',
   './buen-camino-logo.png',
   './icon-192.png',
   './icon-512.png',

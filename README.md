@@ -1,4 +1,14 @@
-# BUEN CAMINO — V8.1 PRO · PUBLIC READY
+# BUEN CAMINO — V8.2 PRO · PUBLIC READY
+
+## V8.2 — Gran vista cielo e información interactiva
+
+- Nuevo botón **🌌 GRAN VISTA CIELO**: carta celeste a pantalla completa, adaptable automáticamente a vertical y horizontal.
+- En la vista normal y en la gran vista aparecen **🏠 INICIO · 👣 ETAPA · ← VOLVER**. Volver recupera además la posición de desplazamiento desde la que se abrió la herramienta.
+- Nuevo **ℹ️ INFO ESTRELLAS Y CONSTELACIONES**. Al tocar una estrella, una línea de constelación o un nombre, la ficha se abre dentro de la app.
+- Las estrellas muestran constelación, magnitud aparente y, cuando hay ubicación, altitud y acimut calculados para ese momento.
+- La gran vista conserva GPS, Modo Cielo y brújula flotante; la brújula puede moverse con el dedo.
+- Se mantienen las 33 etapas y los datos/trazados anteriores. Caché PWA actualizada a V8.2.
+
 
 ## V8.1 — Correcciones de mapas tras prueba real en Samsung/Chrome
 

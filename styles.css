@@ -466,13 +466,5 @@
 .bc-tiles,.bc-overlay{pointer-events:none}.bc-gesture-layer{position:absolute;inset:0;z-index:6;pointer-events:none;touch-action:none!important;-ms-touch-action:none!important;user-select:none;-webkit-user-select:none;background:transparent}.bc-markers{z-index:4;pointer-events:none}.bc-marker{pointer-events:auto}.bc-map-controls,.bc-layer,.bc-center-route,.bc-map-view-controls,.bc-service-filters,.bc-map-legend{pointer-events:auto}
 
 /* V9.7: el contenedor BCMap captura los gestos; la capa auxiliar ya no intercepta toques. */
-.bc-gesture-layer{pointer-events:auto!important;touch-action:none!important;-webkit-tap-highlight-color:transparent}.bc-map{touch-action:none!important;-webkit-user-select:none;user-select:none}
+.bc-gesture-layer{pointer-events:none!important;touch-action:none!important;-webkit-tap-highlight-color:transparent}.bc-map{touch-action:none!important;-webkit-user-select:none;user-select:none}
 
-
-/* V10.0.4 · superficie táctil 2D Android/Samsung */
-.bc-gesture-layer{pointer-events:auto!important;z-index:6!important;touch-action:none!important;-ms-touch-action:none!important;-webkit-user-select:none!important;user-select:none!important}
-.bc-map-controls,.bc-layer,.bc-center-route,.bc-map-view-controls,.bc-service-filters,.bc-map-legend{z-index:10;pointer-events:auto!important;touch-action:manipulation}
-
-/* V10.0.5: sin capa táctil superpuesta */
-.bc-gesture-layer{pointer-events:none!important;z-index:0!important}
-.bc-map-controls,.bc-layer,.bc-center-route,.bc-map-view-controls{z-index:40!important;pointer-events:auto!important}
